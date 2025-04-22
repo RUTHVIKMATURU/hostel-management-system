@@ -11,7 +11,10 @@ const Student = require('../models/StudentModel');
 // const { verifyStudent } = require('../middleware/verifyStudentMiddleware');
 require('dotenv').config();
 
-
+// Add this at the top of your routes
+studentApp.get('/test', (req, res) => {
+    res.json({ message: "Student API is working" });
+});
 
 // APIs
 studentApp.get('/', (req, res) => {
@@ -21,15 +24,58 @@ studentApp.get('/', (req, res) => {
 
 studentApp.post('/login', expressAsyncHandler(async (req, res) => {
     try {
+        console.log('Login attempt for roll number:', req.body.rollNumber);
+        
         const { rollNumber, password } = req.body;
-
-        const student = await Student.findOne({ rollNumber, is_active: true });
-        if (!student || !(await bcrypt.compare(password, student.password))) {
-            return res.status(401).json({ message: "Invalid credentials or inactive account" });
+        
+        // Validate input
+        if (!rollNumber || !password) {
+            return res.status(400).json({ 
+                message: "Roll number and password are required" 
+            });
         }
 
-        const token = jwt.sign({ id: student._id, role: 'student' }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        // Find student
+        const student = await Student.findOne({ rollNumber });
+        
+        if (!student) {
+            console.log('Student not found:', rollNumber);
+            return res.status(401).json({ 
+                message: "Invalid credentials" 
+            });
+        }
 
+        // Check if account is active
+        if (!student.is_active) {
+            console.log('Inactive account:', rollNumber);
+            return res.status(401).json({ 
+                message: "Account is inactive" 
+            });
+        }
+
+        // Compare password using the method we added to the schema
+        const passwordMatch = await student.comparePassword(password);
+        
+        console.log('Password match result:', passwordMatch);
+
+        if (!passwordMatch) {
+            return res.status(401).json({ 
+                message: "Invalid credentials" 
+            });
+        }
+
+        // Generate token
+        const token = jwt.sign(
+            { 
+                id: student._id, 
+                role: 'student',
+                rollNumber: student.rollNumber 
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        // Send response
         res.status(200).json({
             message: "Login successful",
             token,
@@ -37,18 +83,15 @@ studentApp.post('/login', expressAsyncHandler(async (req, res) => {
                 id: student._id,
                 name: student.name,
                 rollNumber: student.rollNumber,
-                branch: student.branch,
-                year: student.year,
-                profilePhoto: student.profilePhoto,
-                phoneNumber: student.phoneNumber,
-                email: student.email,
-                parentMobileNumber: student.parentMobileNumber,
-                roomNumber: student.roomNumber,
-                is_active: student.is_active
+                email: student.email
             }
         });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Login error:', error);
+        res.status(500).json({ 
+            message: "Server error", 
+            error: error.message 
+        });
     }
 }));
 
@@ -193,6 +236,60 @@ studentApp.get('/all-outpasses/:rollNumber', expressAsyncHandler(async (req, res
     }
 }));
 
+studentApp.post('/signup', expressAsyncHandler(async (req, res) => {
+    try {
+        const { 
+            name, rollNumber, branch, year, phoneNumber, 
+            email, parentMobileNumber, roomNumber, password 
+        } = req.body;
+        
+        // Check for existing student
+        const existingStudent = await Student.findOne({ 
+            $or: [{ rollNumber }, { email }] 
+        });
+        
+        if (existingStudent) {
+            return res.status(400).json({ 
+                message: "Student already exists with this roll number or email" 
+            });
+        }
+
+        // Create new student - password will be hashed by pre-save middleware
+        const newStudent = new Student({
+            name,
+            rollNumber,
+            branch,
+            year: parseInt(year),
+            phoneNumber,
+            email,
+            parentMobileNumber,
+            roomNumber,
+            password,
+            is_active: true
+        });
+
+        const savedStudent = await newStudent.save();
+        
+        console.log('Student registered successfully:', {
+            rollNumber: savedStudent.rollNumber,
+            email: savedStudent.email
+        });
+
+        res.status(201).json({ 
+            message: "Student registered successfully", 
+            student: {
+                id: savedStudent._id,
+                name: savedStudent.name,
+                rollNumber: savedStudent.rollNumber,
+                email: savedStudent.email
+            }
+        });
+
+    } catch (error) {
+        console.error('Signup error:', error);
+        res.status(500).json({ error: error.message });
+    }
+}));
 
 
 

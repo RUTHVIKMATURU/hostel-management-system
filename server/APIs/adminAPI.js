@@ -1,11 +1,15 @@
-const exp = require('express');
-const adminApp = exp.Router();
+const express = require('express');
+const adminApp = express.Router();
 const Student = require('../models/StudentModel');
 const expressAsyncHandler = require('express-async-handler');
 const Announcement = require('../models/AnnouncementModel');
 const CommunityPost = require('../models/CommunityPostModel');
 const Complaint = require('../models/ComplaintModel');
 const Outpass = require('../models/OutpassModel');
+const jwt = require('jsonwebtoken');
+const Admin = require('../models/AdminModel');
+const { verifyAdmin } = require('../middleware/adminMiddleware');
+
 
 
 
@@ -15,6 +19,80 @@ adminApp.get('/', (req, res) => {
     res.send('message from Admin API');
 });
 
+// Add this new endpoint
+adminApp.post('/login', expressAsyncHandler(async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        
+        // Debug log
+        console.log('Login attempt for username:', username);
+        
+        // Validate input
+        if (!username || !password) {
+            return res.status(400).json({ 
+                message: "Username and password are required" 
+            });
+        }
+
+        // Find admin
+        const admin = await Admin.findOne({ username });
+        
+        if (!admin) {
+            console.log('Admin not found:', username);
+            return res.status(401).json({ 
+                message: "Invalid credentials" 
+            });
+        }
+
+        console.log('Admin found:', {
+            username: admin.username,
+            hashedPassword: admin.password
+        });
+
+        // Compare password
+        const isMatch = await admin.comparePassword(password);
+        console.log('Password match result:', isMatch);
+        
+        if (!isMatch) {
+            return res.status(401).json({ 
+                message: "Invalid credentials" 
+            });
+        }
+
+        // Generate token
+        const token = jwt.sign(
+            { 
+                id: admin._id, 
+                role: 'admin',
+                username: admin.username 
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '1d' }
+        );
+
+        // Send response
+        res.status(200).json({
+            message: "Login successful",
+            token,
+            admin: {
+                id: admin._id,
+                username: admin.username,
+                name: admin.name,
+                role: admin.role
+            }
+        });
+
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ 
+            message: "Server error", 
+            error: error.message 
+        });
+    }
+}));
+
+// Protected routes
+adminApp.use(verifyAdmin);
 
 // create new student profile
 adminApp.post('/student-register', expressAsyncHandler(async (req, res) => {
@@ -265,7 +343,96 @@ adminApp.get('/pending-outpasses', expressAsyncHandler(async (req, res) => {
     }
 }));
 
+// Update student details
+adminApp.put('/student-update/:rollNumber', expressAsyncHandler(async (req, res) => {
+    try {
+        const { rollNumber } = req.params;
+        const updateData = req.body;
+        
+        // Remove sensitive fields that shouldn't be updated
+        delete updateData.password;
+        delete updateData.rollNumber;
+        
+        const updatedStudent = await Student.findOneAndUpdate(
+            { rollNumber },
+            updateData,
+            { new: true }
+        );
 
+        if (!updatedStudent) {
+            return res.status(404).json({ message: "Student not found" });
+        }
+
+        res.status(200).json(updatedStudent);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}));
+
+// Bulk actions on students
+adminApp.post('/students/bulk', expressAsyncHandler(async (req, res) => {
+    try {
+        const { students, action } = req.body;
+        
+        if (!students || !students.length) {
+            return res.status(400).json({ message: "No students selected" });
+        }
+
+        const isActive = action === 'activate';
+        
+        await Student.updateMany(
+            { rollNumber: { $in: students } },
+            { $set: { is_active: isActive } }
+        );
+
+        res.status(200).json({ 
+            message: `Successfully ${action}d ${students.length} students` 
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}));
+
+// Get all students with pagination and filters
+adminApp.get('/students', verifyAdmin, expressAsyncHandler(async (req, res) => {
+    try {
+        const { page = 1, limit = 10, status, search } = req.query;
+        
+        let query = {};
+        
+        if (status) {
+            query.is_active = status === 'active';
+        }
+        
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { rollNumber: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        const students = await Student.find(query)
+            .select('-password')
+            .limit(Number(limit))
+            .skip((Number(page) - 1) * Number(limit))
+            .exec();
+
+        const count = await Student.countDocuments(query);
+
+        res.status(200).json({
+            students,
+            totalPages: Math.ceil(count / limit),
+            currentPage: Number(page),
+            totalStudents: count
+        });
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({ 
+            message: 'Failed to fetch students',
+            error: error.message 
+        });
+    }
+}));
 
 
 

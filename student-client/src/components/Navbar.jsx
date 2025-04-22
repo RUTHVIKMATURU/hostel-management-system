@@ -1,116 +1,161 @@
-import React from 'react'
-import { useUser } from '../context/UserContext'
-import { Home, Bell, Users, MessageSquare, LogOut, User } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Home, Bell, MessageSquare, LogOut, User, UserPlus } from 'lucide-react';
 
-function Navbar() {
-    const { user } = useUser()
-    
-    const navbarStyle = {
-        backgroundColor: '#FFBF00',
-        minHeight:"90vh",
-        minWidth:"15vw",
-        
-        display: 'flex',
-        flexDirection: 'column'
+const Navbar = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const isLoggedIn = localStorage.getItem('studentToken');
+    const studentInfo = isLoggedIn ? JSON.parse(localStorage.getItem('studentInfo')) : null;
+
+    const handleLogout = () => {
+        localStorage.removeItem('studentToken');
+        localStorage.removeItem('studentInfo');
+        navigate('/login');
     };
-    
-    const headerStyle = {
+
+    const navItems = isLoggedIn ? [
+        { icon: <Home size={20} />, label: 'Home', path: '/home' },
+        { icon: <Bell size={20} />, label: 'Announcements', path: '/announcements' },
+        { icon: <MessageSquare size={20} />, label: 'Complaints', path: '/complaints' },
+        { icon: <LogOut size={20} />, label: 'Outpass', path: '/outpass' },
+    ] : [
+        { icon: <User size={20} />, label: 'Login', path: '/login' },
+        { icon: <UserPlus size={20} />, label: 'Sign Up', path: '/signup' },
+    ];
+
+    return (
+        <div style={styles.navbar}>
+            <div style={styles.content}>
+                <Link to={isLoggedIn ? '/home' : '/'} style={styles.titleLink}>
+                    <h1 style={styles.title}>Student Portal</h1>
+                </Link>
+                
+                <nav style={styles.nav}>
+                    {navItems.map((item, index) => (
+                        <Link
+                            key={index}
+                            to={item.path}
+                            style={{
+                                ...styles.navItem,
+                                backgroundColor: location.pathname === item.path ? '#FFAE00' : 'transparent',
+                                color: location.pathname === item.path ? '#fff' : '#333'
+                            }}
+                        >
+                            <span style={styles.icon}>{item.icon}</span>
+                            <span>{item.label}</span>
+                        </Link>
+                    ))}
+                </nav>
+
+                {isLoggedIn && studentInfo && (
+                    <div style={styles.profile}>
+                        <Link to="/profile" style={styles.profileLink}>
+                            <div style={styles.avatar}>
+                                {studentInfo.name?.[0] || 'S'}
+                            </div>
+                            <div style={styles.userInfo}>
+                                <p style={styles.userName}>{studentInfo.name}</p>
+                                <p style={styles.userId}>ID: {studentInfo.rollNumber}</p>
+                            </div>
+                        </Link>
+                        <button onClick={handleLogout} style={styles.logoutButton}>
+                            Logout
+                        </button>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+const styles = {
+    navbar: {
+        backgroundColor: '#fff',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
         padding: '1rem',
-        textAlign: 'center'
-    };
-    
-    const navStyle = {
+    },
+    content: {
+        maxWidth: '1200px',
+        margin: '0 auto',
         display: 'flex',
-        flexDirection: 'column',
-        flex: '1',
-        padding: '0.5rem'
-    };
-    
-    const profileContainerStyle = {
-        marginTop: 'auto',
-        padding: '1rem',
-        borderTop: '1px solid #FFAE00'
-    };
-    
-    const profileStyle = {
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    titleLink: {
+        textDecoration: 'none',
+        color: '#333',
+    },
+    title: {
+        margin: 0,
+        fontSize: '1.5rem',
+        fontWeight: 'bold',
+    },
+    nav: {
         display: 'flex',
-        alignItems: 'center'
-    };
-    
-    const avatarStyle = {
-        backgroundColor: '#0D6EFD',
-        color: 'white',
+        gap: '1rem',
+    },
+    navItem: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        padding: '0.5rem 1rem',
+        textDecoration: 'none',
+        borderRadius: '4px',
+        transition: 'all 0.2s',
+    },
+    icon: {
+        display: 'flex',
+        alignItems: 'center',
+    },
+    profile: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '1rem',
+    },
+    profileLink: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        textDecoration: 'none',
+        color: '#333',
+    },
+    avatar: {
+        width: '40px',
+        height: '40px',
+        backgroundColor: '#FFAE00',
         borderRadius: '50%',
-        width: '2rem',
-        height: '2rem',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        marginRight: '0.5rem'
-    };
-    
-    return (
-        <div style={navbarStyle}>
-            <div style={headerStyle}>
-                <h1 className="h4 mb-0 fw-bold">Student Portal</h1>
-            </div>
-            
-            <nav style={navStyle}>
-                <NavItem icon={<Home size={20} />} label="Home" to="" />
-                <NavItem icon={<Bell size={20} />} label="Announcements" to="announcements" />
-                {/* <NavItem icon={<Users size={20} />} label="Community" to="community" /> */}
-                <NavItem icon={<MessageSquare size={20} />} label="Complaints" to="complaints" />
-                <NavItem icon={<LogOut size={20} />} label="Outpass" to="outpass" />
-                <NavItem icon={<User size={20} />} label="Student Profile" to="profile" />
-            </nav>
-            
-            <div style={profileContainerStyle}>
-                <div style={profileStyle}>
-                    <div style={avatarStyle}>
-                        <span>S</span>
-                    </div>
-                    <div>
-                        <p className="mb-0 fw-medium">{user.name}</p>
-                        <p className="mb-0 small text-muted">ID: {user.rollNumber}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-const NavItem = ({ icon, label, to }) => {
-    const [isHovered, setIsHovered] = React.useState(false);
-    
-    const navItemStyle = {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
+    userInfo: {
         display: 'flex',
-        alignItems: 'center',
-        padding: '0.75rem',
-        borderRadius: '0.375rem',
+        flexDirection: 'column',
+    },
+    userName: {
+        margin: 0,
+        fontWeight: 'bold',
+    },
+    userId: {
+        margin: 0,
+        fontSize: '0.8rem',
+        color: '#666',
+    },
+    logoutButton: {
+        padding: '0.5rem 1rem',
+        backgroundColor: '#ff4444',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '4px',
         cursor: 'pointer',
         transition: 'background-color 0.2s',
-        backgroundColor: isHovered ? '#FFAE00' : 'transparent',
-        textDecoration: 'none',
-        color: 'inherit'
-    };
-    
-    const iconStyle = {
-        marginRight: '0.5rem'
-    };
-    
-    return (
-        <Link 
-            to={to}
-            style={navItemStyle}
-            className="nav-item"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-        >
-            <div style={iconStyle}>{icon}</div>
-            <span className="fw-medium">{label}</span>
-        </Link>
-    );
+        ':hover': {
+            backgroundColor: '#cc0000',
+        },
+    },
 };
 
 export default Navbar

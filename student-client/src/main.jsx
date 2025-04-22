@@ -4,10 +4,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 import { UserProvider } from "./context/UserContext.jsx";
+import PrivateRoute from './components/PrivateRoute.jsx';
 
 import RootLayout from './layouts/RootLayout.jsx';
 import Home from './pages/Home.jsx';
 import StudentLogin from './components/StudentLogin.jsx';
+import StudentSignup from './components/StudentSignup.jsx';
 import Announcement from './components/Announcement.jsx';
 import Community from './components/Community.jsx';
 import Complaints from './components/Complaints.jsx';
@@ -23,51 +25,51 @@ import ComplaintsList from './components/ComplaintsList.jsx';
 const browserRouterObj = createBrowserRouter([
   {
     path: '/',
-    element: <Navigate to="/login" replace />
-  },
-  {
-    path: '/login',
-    element: <StudentLogin />,
-  },
-  {
-    path: '/home',
     element: <RootLayout />,
     children: [
       {
         index: true,
-        element: <Home />
+        element: <Navigate to="/login" replace />
+      },
+      {
+        path: 'login',
+        element: <StudentLogin />
+      },
+      {
+        path: 'signup',
+        element: <StudentSignup />
+      },
+      {
+        path: 'home',
+        element: <PrivateRoute><Home /></PrivateRoute>
       },
       {
         path: 'announcements',
-        element: <Announcement />,
+        element: <PrivateRoute><Announcement /></PrivateRoute>,
         children: [
           { path: 'today', element: <TodayAnnouncements /> },
           { path: 'all', element: <AllAnnouncements /> }
         ]
       },
-      // {
-      //   path: 'community',
-      //   element: <Community />
-      // },
       {
         path: 'complaints',
-        element: <Complaints />,
+        element: <PrivateRoute><Complaints /></PrivateRoute>,
         children: [
-          { path: 'complaint', element: <PostComplaint/> },
+          { path: 'complaint', element: <PostComplaint /> },
           { path: 'complaint-list', element: <ComplaintsList /> }
         ]
       },
       {
         path: 'outpass',
-        element: <OutpassPage />,
+        element: <PrivateRoute><OutpassPage /></PrivateRoute>,
         children: [
-          { path: 'apply-outpass', element: <Outpass/> },
-          { path: 'outpass-history', element: <OutpassList/> }
+          { path: 'apply-outpass', element: <Outpass /> },
+          { path: 'outpass-history', element: <OutpassList /> }
         ]
       },
       {
         path: 'profile',
-        element: <StudentProfile />
+        element: <PrivateRoute><StudentProfile /></PrivateRoute>
       }
     ]
   },
@@ -82,6 +84,5 @@ createRoot(document.getElementById('root')).render(
     <UserProvider>
       <RouterProvider router={browserRouterObj} />
     </UserProvider>
-    
   </StrictMode>,
 );

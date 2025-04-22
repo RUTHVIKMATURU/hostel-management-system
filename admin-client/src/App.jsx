@@ -1,13 +1,46 @@
 
-import './App.css'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import AdminLogin from './components/AdminLogin';
+import AdminDashboard from './components/AdminDashboard';
+import StudentManagement from './components/StudentManagement';
+import ComplaintManagement from './components/ComplaintManagement';
+import AdminPrivateRoute from './components/AdminPrivateRoute';
+import AdminNavbar from './components/AdminNavbar';
 
 function App() {
-
   return (
-   <div className="">
+    <Router>
+      <Routes>
+        {/* Default route redirect */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        
+        {/* Public routes */}
+        <Route path="/login" element={<AdminLogin />} />
+        
+        {/* Protected routes */}
+        <Route path="/*" element={<AdminNavbar />}>
+          <Route path="dashboard" element={
+            <AdminPrivateRoute>
+              <AdminDashboard />
+            </AdminPrivateRoute>
+          } />
+          <Route path="students" element={
+            <AdminPrivateRoute>
+              <StudentManagement />
+            </AdminPrivateRoute>
+          } />
+          <Route path="complaints" element={
+            <AdminPrivateRoute>
+              <ComplaintManagement />
+            </AdminPrivateRoute>
+          } />
+        </Route>
 
-   </div>
-  )
+        {/* Catch all route */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;

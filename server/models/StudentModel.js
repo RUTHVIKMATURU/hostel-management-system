@@ -35,8 +35,9 @@ const studentSchema = new mongoose.Schema({
         unique: true
     },
     password: {
-      type: String,
-      required: true
+        type: String,
+        required: true,
+        minlength: 6
     },
     parentMobileNumber: {
         type: String,
@@ -52,12 +53,30 @@ const studentSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-studentSchema.pre('save', async function (next) {
+// Pre-save middleware to hash password
+studentSchema.pre('save', async function(next) {
+    // Only hash the password if it has been modified (or is new)
     if (!this.isModified('password')) return next();
-    this.password = await bcrypt.hash(this.password, 10);
-    next();
+    
+    try {
+        // Generate a salt with cost factor 10
+        const salt = await bcrypt.genSalt(10);
+        // Hash password with new salt
+        this.password = await bcrypt.hash(this.password, salt);
+        next();
+    } catch (error) {
+        next(error);
+    }
 });
 
+// Add method to compare password
+studentSchema.methods.comparePassword = async function(candidatePassword) {
+    try {
+        return await bcrypt.compare(candidatePassword, this.password);
+    } catch (error) {
+        throw error;
+    }
+};
 
 const StudentModel = mongoose.model('Student', studentSchema);
 
