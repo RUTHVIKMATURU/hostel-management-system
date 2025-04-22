@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from '../utils/axios';
+import AddStudent from './AddStudent';
 
 const StudentManagement = () => {
     const [students, setStudents] = useState([]);
@@ -10,6 +11,7 @@ const StudentManagement = () => {
     const [error, setError] = useState(null);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [showAddModal, setShowAddModal] = useState(false);
 
     useEffect(() => {
         fetchStudents();
@@ -80,6 +82,11 @@ const StudentManagement = () => {
         }
     };
 
+    const handleAddSuccess = () => {
+        setShowAddModal(false);
+        fetchStudents();
+    };
+
     return (
         <div className="container mt-4">
             {error && (
@@ -102,6 +109,12 @@ const StudentManagement = () => {
                     />
                 </div>
                 <div className="col-auto">
+                    <button 
+                        className="btn btn-primary me-2"
+                        onClick={() => setShowAddModal(true)}
+                    >
+                        Add Student
+                    </button>
                     <div className="btn-group">
                         <button 
                             className="btn btn-danger"
@@ -120,6 +133,18 @@ const StudentManagement = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Add Modal */}
+            {showAddModal && (
+                <div className="modal show d-block" tabIndex="-1">
+                    <div className="modal-dialog modal-lg">
+                        <AddStudent 
+                            onSuccess={handleAddSuccess}
+                            onCancel={() => setShowAddModal(false)}
+                        />
+                    </div>
+                </div>
+            )}
 
             {loading ? (
                 <div className="text-center">
@@ -290,6 +315,7 @@ const StudentManagement = () => {
 };
 
 export default StudentManagement;
+
 
 
 

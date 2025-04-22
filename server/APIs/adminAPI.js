@@ -434,6 +434,67 @@ adminApp.get('/students', verifyAdmin, expressAsyncHandler(async (req, res) => {
     }
 }));
 
+// Add new student
+adminApp.post('/add-student', verifyAdmin, expressAsyncHandler(async (req, res) => {
+    try {
+        const { 
+            name, 
+            rollNumber, 
+            branch, 
+            year, 
+            phoneNumber, 
+            email, 
+            parentMobileNumber, 
+            roomNumber, 
+            password 
+        } = req.body;
+
+        // Validate required fields
+        if (!name || !rollNumber || !branch || !year || !phoneNumber || !email || !parentMobileNumber || !roomNumber || !password) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        // Check if student already exists
+        const existingStudent = await Student.findOne({ 
+            $or: [{ rollNumber }, { email }] 
+        });
+
+        if (existingStudent) {
+            return res.status(400).json({ 
+                message: "Student already exists with this roll number or email" 
+            });
+        }
+
+        const newStudent = new Student({
+            name,
+            rollNumber,
+            branch,
+            year: parseInt(year),
+            phoneNumber,
+            email,
+            parentMobileNumber,
+            roomNumber,
+            password,
+            is_active: true
+        });
+
+        await newStudent.save();
+
+        res.status(201).json({ 
+            message: "Student added successfully", 
+            student: {
+                name: newStudent.name,
+                rollNumber: newStudent.rollNumber,
+                email: newStudent.email
+            }
+        });
+
+    } catch (error) {
+        console.error('Error adding student:', error);
+        res.status(500).json({ error: error.message });
+    }
+}));
+
 
 
 module.exports = adminApp;
