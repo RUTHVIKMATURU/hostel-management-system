@@ -8,43 +8,46 @@ import Complaints from './components/Complaints';
 import Outpass from './components/Outpass';
 import Profile from './components/Profile';
 import PrivateRoute from './components/PrivateRoute';
+import { UserProvider } from './context/UserContext';
 
 const App = () => {
     return (
-        <Router>
-            <Routes>
-                <Route path="/" element={<RootLayout />}>
-                    <Route index element={<Navigate to="/login" replace />} />
-                    <Route path="login" element={<StudentLogin />} />
-                    <Route path="signup" element={<StudentSignup />} />
-                    <Route path="home" element={
-                        <PrivateRoute>
-                            <Home />
-                        </PrivateRoute>
-                    } />
-                    <Route path="announcements" element={
-                        <PrivateRoute>
-                            <Announcements />
-                        </PrivateRoute>
-                    } />
-                    <Route path="complaints" element={
-                        <PrivateRoute>
-                            <Complaints />
-                        </PrivateRoute>
-                    } />
-                    <Route path="outpass" element={
-                        <PrivateRoute>
-                            <Outpass />
-                        </PrivateRoute>
-                    } />
-                    <Route path="profile" element={
-                        <PrivateRoute>
-                            <Profile />
-                        </PrivateRoute>
-                    } />
-                </Route>
-            </Routes>
-        </Router>
+        <UserProvider>
+            <Router>
+                <Routes>
+                    <Route path="/" element={<RootLayout />}>
+                        <Route index element={<Navigate to="/login" replace />} />
+                        <Route path="login" element={<StudentLogin />} />
+                        <Route path="signup" element={<StudentSignup />} />
+                        <Route path="home" element={
+                            <PrivateRoute>
+                                <Home />
+                            </PrivateRoute>
+                        } />
+                        <Route path="announcements" element={
+                            <PrivateRoute>
+                                <Announcements />
+                            </PrivateRoute>
+                        } />
+                        <Route path="complaints" element={
+                            <PrivateRoute>
+                                <Complaints />
+                            </PrivateRoute>
+                        } />
+                        <Route path="outpass" element={
+                            <PrivateRoute>
+                                <Outpass />
+                            </PrivateRoute>
+                        } />
+                        <Route path="profile" element={
+                            <PrivateRoute>
+                                <Profile />
+                            </PrivateRoute>
+                        } />
+                    </Route>
+                </Routes>
+            </Router>
+        </UserProvider>
     );
 };
 

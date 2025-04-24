@@ -6,7 +6,6 @@ const Complaint = require('../models/ComplaintModel');
 const CommunityPost = require('../models/CommunityPostModel');
 const Outpass = require('../models/OutpassModel');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 const Student = require('../models/StudentModel');
 // const { verifyStudent } = require('../middleware/verifyStudentMiddleware');
 require('dotenv').config();
@@ -83,7 +82,13 @@ studentApp.post('/login', expressAsyncHandler(async (req, res) => {
                 id: student._id,
                 name: student.name,
                 rollNumber: student.rollNumber,
-                email: student.email
+                branch: student.branch,
+                year: student.year,
+                phoneNumber: student.phoneNumber,
+                email: student.email,
+                parentMobileNumber: student.parentMobileNumber,
+                roomNumber: student.roomNumber,
+                profilePhoto: student.profilePhoto
             }
         });
     } catch (error) {
