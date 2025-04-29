@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import { Megaphone, CalendarDays, ArrowRight } from 'lucide-react';
-// import TodayAnnouncements from './TodayAnnouncements';
-// import AllAnnouncements from './AllAnnouncements';
 import Outpass from './Outpass';
 import OutpassList from './OutpassList';
 
 const OutpassPage = () => {
-    const [activeTab, setActiveTab] = useState('outpass'); // Default to today's announcements
+    const [activeTab, setActiveTab] = useState('outpass');
 
     const tabHeaderStyle = {
         display: 'flex',
@@ -37,7 +35,6 @@ const OutpassPage = () => {
                 <Megaphone size={32} style={{ marginRight: '10px' }} /> OUTPASS SECTION
             </h2>
 
-            {/* Tab Headers */}
             <div style={tabHeaderStyle}>
                 <div 
                     style={activeTab === 'outpass' ? activeTabStyle : tabStyle}
@@ -53,8 +50,7 @@ const OutpassPage = () => {
                 </div>
             </div>
 
-            {/* Content based on active tab */}
-            {activeTab === 'outpass' ? <Outpass/> : <OutpassList />}
+            {activeTab === 'outpass' ? <Outpass /> : <OutpassList />}
         </div>
     );
 };

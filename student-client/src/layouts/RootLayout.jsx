@@ -1,15 +1,9 @@
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { useUser } from '../context/UserContext';
 
 const RootLayout = () => {
-    const navigate = useNavigate();
-    const isLoggedIn = localStorage.getItem('studentToken');
-
-    const handleLogout = () => {
-        localStorage.removeItem('studentToken');
-        localStorage.removeItem('studentInfo');
-        navigate('/login');
-    };
+    const { user } = useUser();
 
     return (
         <div style={styles.container}>

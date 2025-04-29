@@ -44,6 +44,7 @@ adminApp.post('/login', expressAsyncHandler(async (req, res) => {
             });
         }
 
+        // Debug log
         console.log('Admin found:', {
             username: admin.username,
             hashedPassword: admin.password
@@ -269,8 +270,10 @@ adminApp.get('/get-community-messages', expressAsyncHandler(async (req, res) => 
 adminApp.get('/get-complaints', expressAsyncHandler(async (req, res) => {
     try {
         const complaints = await Complaint.find().sort({ createdAt: -1 });
+        console.log('Fetched complaints:', complaints); // Add debugging log
         res.status(200).json(complaints);
     } catch (error) {
+        console.error('Error fetching complaints:', error);
         res.status(500).json({ error: error.message });
     }
 }));
@@ -495,6 +498,61 @@ adminApp.post('/add-student', verifyAdmin, expressAsyncHandler(async (req, res) 
     }
 }));
 
+adminApp.get('/verify-token', verifyAdmin, (req, res) => {
+    try {
+        // If middleware passes, token is valid
+        res.json({ 
+            valid: true,
+            admin: req.admin // The decoded admin info from the token
+        });
+    } catch (error) {
+        res.status(401).json({ 
+            valid: false,
+            message: 'Invalid token'
+        });
+    }
+});
 
+// Get all requests (outpasses)
+adminApp.get('/requests', expressAsyncHandler(async (req, res) => {
+    try {
+        const outpasses = await Outpass.find()
+            .sort({ createdAt: -1 })
+            .populate('studentId', 'name rollNumber');
+        res.status(200).json(outpasses);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}));
+
+// Update request status
+adminApp.put('/requests/:id', expressAsyncHandler(async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status, remarks } = req.body;
+
+        if (!['approved', 'rejected', 'pending'].includes(status)) {
+            return res.status(400).json({ message: "Invalid status" });
+        }
+
+        const updatedRequest = await Outpass.findByIdAndUpdate(
+            id,
+            { 
+                status,
+                remarks,
+                updatedAt: Date.now()
+            },
+            { new: true }
+        );
+
+        if (!updatedRequest) {
+            return res.status(404).json({ message: "Request not found" });
+        }
+
+        res.status(200).json(updatedRequest);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}));
 
 module.exports = adminApp;

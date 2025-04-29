@@ -1,22 +1,28 @@
 import { useForm } from 'react-hook-form';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from '../utils/axios';
+import { useAuth } from '../context/AuthContext';
 
 const AdminLogin = () => {
-    const { register, handleSubmit, formState: { errors }, setError } = useForm();
+    const { login } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+    const { register, handleSubmit, setError, formState: { errors } } = useForm();
 
     const onSubmit = async (data) => {
         try {
             const response = await axios.post('/admin-api/login', data);
-            localStorage.setItem('adminToken', response.data.token);
-            localStorage.setItem('adminInfo', JSON.stringify(response.data.admin));
             
-            // Redirect to the attempted URL or dashboard
-            const from = location.state?.from?.pathname || '/dashboard';
-            navigate(from, { replace: true });
+            if (response.data.token && response.data.admin) {
+                // Use the login function from context
+                login(response.data.admin, response.data.token);
+                
+                // Navigate to dashboard or intended destination
+                const from = location.state?.from?.pathname || '/dashboard';
+                navigate(from, { replace: true });
+            }
         } catch (error) {
+            console.error('Login error:', error);
             setError('password', {
                 type: 'manual',
                 message: error.response?.data?.message || 'Login failed'
@@ -126,4 +132,7 @@ const styles = {
 };
 
 export default AdminLogin;
+
+
+
 

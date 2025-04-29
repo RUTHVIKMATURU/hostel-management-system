@@ -227,14 +227,11 @@ studentApp.post('/apply-outpass', expressAsyncHandler(async (req, res) => {
 }));
 
 // to get all the outpasses applied by the student
-// Get all outpass requests by a student's roll number
 studentApp.get('/all-outpasses/:rollNumber', expressAsyncHandler(async (req, res) => {
     try {
         const { rollNumber } = req.params;
         const studentOutpasses = await Outpass.find({ rollNumber });
-        if (!studentOutpasses.length) {
-            return res.status(404).json({ message: 'No outpass requests found for this student' });
-        }
+        // Always return 200 with the results, even if empty
         res.status(200).json({ studentOutpasses });
     } catch (error) {
         res.status(500).json({ error: error.message });

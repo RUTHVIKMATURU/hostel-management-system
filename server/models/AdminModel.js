@@ -25,6 +25,7 @@ const adminSchema = new mongoose.Schema({
 
 // Hash password before saving
 adminSchema.pre('save', async function(next) {
+    // Only hash if password is modified or new
     if (!this.isModified('password')) return next();
     
     try {
@@ -39,8 +40,16 @@ adminSchema.pre('save', async function(next) {
 // Method to compare password
 adminSchema.methods.comparePassword = async function(candidatePassword) {
     try {
-        return await bcrypt.compare(candidatePassword, this.password);
+        // Add logging for debugging
+        console.log('Comparing passwords:');
+        console.log('Candidate password:', candidatePassword);
+        console.log('Stored hashed password:', this.password);
+        
+        const isMatch = await bcrypt.compare(candidatePassword, this.password);
+        console.log('Password match result:', isMatch);
+        return isMatch;
     } catch (error) {
+        console.error('Password comparison error:', error);
         throw error;
     }
 };
@@ -48,3 +57,4 @@ adminSchema.methods.comparePassword = async function(candidatePassword) {
 const Admin = mongoose.model('Admin', adminSchema);
 
 module.exports = Admin;
+

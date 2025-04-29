@@ -61,11 +61,7 @@ const browserRouterObj = createBrowserRouter([
       },
       {
         path: 'outpass',
-        element: <PrivateRoute><OutpassPage /></PrivateRoute>,
-        children: [
-          { path: 'apply-outpass', element: <Outpass /> },
-          { path: 'outpass-history', element: <OutpassList /> }
-        ]
+        element: <PrivateRoute><OutpassPage /></PrivateRoute>
       },
       {
         path: 'profile',

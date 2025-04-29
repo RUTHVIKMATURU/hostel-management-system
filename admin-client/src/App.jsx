@@ -1,5 +1,6 @@
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
 import StudentManagement from './components/StudentManagement';
@@ -9,37 +10,39 @@ import AdminNavbar from './components/AdminNavbar';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Default route redirect */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        
-        {/* Public routes */}
-        <Route path="/login" element={<AdminLogin />} />
-        
-        {/* Protected routes */}
-        <Route path="/*" element={<AdminNavbar />}>
-          <Route path="dashboard" element={
-            <AdminPrivateRoute>
-              <AdminDashboard />
-            </AdminPrivateRoute>
-          } />
-          <Route path="students" element={
-            <AdminPrivateRoute>
-              <StudentManagement />
-            </AdminPrivateRoute>
-          } />
-          <Route path="complaints" element={
-            <AdminPrivateRoute>
-              <ComplaintManagement />
-            </AdminPrivateRoute>
-          } />
-        </Route>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Default route redirect */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          
+          {/* Public routes */}
+          <Route path="/login" element={<AdminLogin />} />
+          
+          {/* Protected routes */}
+          <Route path="/*" element={<AdminNavbar />}>
+            <Route path="dashboard" element={
+              <AdminPrivateRoute>
+                <AdminDashboard />
+              </AdminPrivateRoute>
+            } />
+            <Route path="students" element={
+              <AdminPrivateRoute>
+                <StudentManagement />
+              </AdminPrivateRoute>
+            } />
+            <Route path="complaints" element={
+              <AdminPrivateRoute>
+                <ComplaintManagement />
+              </AdminPrivateRoute>
+            } />
+          </Route>
 
-        {/* Catch all route */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
-    </Router>
+          {/* Catch all route */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

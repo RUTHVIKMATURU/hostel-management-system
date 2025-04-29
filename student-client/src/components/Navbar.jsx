@@ -1,20 +1,19 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Bell, MessageSquare, LogOut, User, UserPlus } from 'lucide-react';
+import { useUser } from '../context/UserContext';
 
 const Navbar = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const isLoggedIn = localStorage.getItem('studentToken');
-    const studentInfo = isLoggedIn ? JSON.parse(localStorage.getItem('studentInfo')) : null;
+    const { user, logout } = useUser();
 
     const handleLogout = () => {
-        localStorage.removeItem('studentToken');
-        localStorage.removeItem('studentInfo');
+        logout(); // Use the logout function from context
         navigate('/login');
     };
 
-    const navItems = isLoggedIn ? [
+    const navItems = user ? [
         { icon: <Home size={20} />, label: 'Home', path: '/home' },
         { icon: <Bell size={20} />, label: 'Announcements', path: '/announcements' },
         { icon: <MessageSquare size={20} />, label: 'Complaints', path: '/complaints' },
@@ -27,7 +26,7 @@ const Navbar = () => {
     return (
         <div style={styles.navbar}>
             <div style={styles.content}>
-                <Link to={isLoggedIn ? '/home' : '/'} style={styles.titleLink}>
+                <Link to={user ? '/home' : '/'} style={styles.titleLink}>
                     <h1 style={styles.title}>Student Portal</h1>
                 </Link>
                 
@@ -48,15 +47,15 @@ const Navbar = () => {
                     ))}
                 </nav>
 
-                {isLoggedIn && studentInfo && (
+                {user && (
                     <div style={styles.profile}>
                         <Link to="/profile" style={styles.profileLink}>
                             <div style={styles.avatar}>
-                                {studentInfo.name?.[0] || 'S'}
+                                {user.name?.[0] || 'S'}
                             </div>
                             <div style={styles.userInfo}>
-                                <p style={styles.userName}>{studentInfo.name}</p>
-                                <p style={styles.userId}>ID: {studentInfo.rollNumber}</p>
+                                <p style={styles.userName}>{user.name}</p>
+                                <p style={styles.userId}>ID: {user.rollNumber}</p>
                             </div>
                         </Link>
                         <button onClick={handleLogout} style={styles.logoutButton}>

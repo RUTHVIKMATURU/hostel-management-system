@@ -1,13 +1,12 @@
-require('dotenv').config();
 const mongoose = require('mongoose');
 const Admin = require('../models/AdminModel');
-
-mongoose.connect(process.env.DBURL)
-    .then(() => console.log("Connected to MongoDB"))
-    .catch(err => console.error("MongoDB connection error:", err));
+require('dotenv').config();
 
 async function createAdmin() {
     try {
+        await mongoose.connect(process.env.DBURL);
+        console.log('Connected to database');
+
         const adminData = {
             username: "admin123",
             password: "123456",  // Will be automatically hashed
@@ -23,18 +22,30 @@ async function createAdmin() {
         await admin.save();
         
         console.log('Admin created successfully');
-        console.log('Admin details (including hashed password):', admin.toObject());
+        console.log('Admin details:', {
+            username: admin.username,
+            name: admin.name,
+            role: admin.role
+        });
         
         // Verify password comparison works
         const testPassword = await admin.comparePassword("123456");
         console.log('Password verification test:', testPassword);
 
+        if (testPassword) {
+            console.log('Password verification successful');
+        } else {
+            console.log('Password verification failed');
+        }
+
+        await mongoose.disconnect();
+        console.log('Disconnected from database');
+
     } catch (error) {
         console.error('Error creating admin:', error);
-    } finally {
-        await mongoose.disconnect();
-        console.log("Disconnected from MongoDB");
+        process.exit(1);
     }
 }
 
 createAdmin();
+

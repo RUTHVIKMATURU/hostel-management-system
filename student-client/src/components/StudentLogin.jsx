@@ -1,10 +1,17 @@
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import axiosInstance from '../utils/axios';
+import { useUser } from '../context/UserContext';
 
 const StudentLogin = () => {
-    const { register, handleSubmit, formState: { errors }, setError } = useForm();
+    const { login } = useUser();
     const navigate = useNavigate();
+    const { 
+        register, 
+        handleSubmit, 
+        setError, 
+        formState: { errors } 
+    } = useForm();
 
     const onSubmit = async (data) => {
         try {
@@ -15,7 +22,7 @@ const StudentLogin = () => {
             
             if (response.data.token && response.data.student) {
                 localStorage.setItem('studentToken', response.data.token);
-                localStorage.setItem('studentInfo', JSON.stringify(response.data.student));
+                login(response.data.student);
                 navigate('/home');
             }
         } catch (error) {
