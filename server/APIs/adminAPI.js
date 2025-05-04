@@ -24,9 +24,6 @@ adminApp.post('/login', expressAsyncHandler(async (req, res) => {
     try {
         const { username, password } = req.body;
         
-        // Debug log
-        console.log('Login attempt for username:', username);
-        
         // Validate input
         if (!username || !password) {
             return res.status(400).json({ 
@@ -38,21 +35,14 @@ adminApp.post('/login', expressAsyncHandler(async (req, res) => {
         const admin = await Admin.findOne({ username });
         
         if (!admin) {
-            console.log('Admin not found:', username);
             return res.status(401).json({ 
                 message: "Invalid credentials" 
             });
         }
 
-        // Debug log
-        console.log('Admin found:', {
-            username: admin.username,
-            hashedPassword: admin.password
-        });
 
         // Compare password
         const isMatch = await admin.comparePassword(password);
-        console.log('Password match result:', isMatch);
         
         if (!isMatch) {
             return res.status(401).json({ 
@@ -84,7 +74,6 @@ adminApp.post('/login', expressAsyncHandler(async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Login error:', error);
         res.status(500).json({ 
             message: "Server error", 
             error: error.message 
@@ -237,22 +226,6 @@ adminApp.get('/announcements',expressAsyncHandler(async (req, res) => {
 }))
 
 
-// // to post community message
-// adminApp.post('/post-community-message', expressAsyncHandler(async (req, res) => {
-//     try {
-//         const { content, images, postedBy, category } = req.body;
-
-//         const newPost = new CommunityPost({ content, images, postedBy, category });
-
-//         await newPost.save();
-
-//         res.status(201).json({ message: "Community message posted successfully", post: newPost });
-//     } catch (error) {
-//         res.status(500).json({ error: error.message });
-//     }
-// }));
-
-// to read community messages
 adminApp.get('/get-community-messages', expressAsyncHandler(async (req, res) => {
     try {
         const communityPosts = await CommunityPost.find().sort({ createdAt: -1 });
@@ -263,10 +236,6 @@ adminApp.get('/get-community-messages', expressAsyncHandler(async (req, res) => 
     }
 }));
 
-
-//  // complaints section
-
-// to read all complaints
 adminApp.get('/get-complaints', expressAsyncHandler(async (req, res) => {
     try {
         const complaints = await Complaint.find().sort({ createdAt: -1 });
@@ -493,7 +462,6 @@ adminApp.post('/add-student', verifyAdmin, expressAsyncHandler(async (req, res) 
         });
 
     } catch (error) {
-        console.error('Error adding student:', error);
         res.status(500).json({ error: error.message });
     }
 }));

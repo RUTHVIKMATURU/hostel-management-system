@@ -23,8 +23,6 @@ studentApp.get('/', (req, res) => {
 
 studentApp.post('/login', expressAsyncHandler(async (req, res) => {
     try {
-        console.log('Login attempt for roll number:', req.body.rollNumber);
-        
         const { rollNumber, password } = req.body;
         
         // Validate input
@@ -38,7 +36,6 @@ studentApp.post('/login', expressAsyncHandler(async (req, res) => {
         const student = await Student.findOne({ rollNumber });
         
         if (!student) {
-            console.log('Student not found:', rollNumber);
             return res.status(401).json({ 
                 message: "Invalid credentials" 
             });
@@ -46,7 +43,6 @@ studentApp.post('/login', expressAsyncHandler(async (req, res) => {
 
         // Check if account is active
         if (!student.is_active) {
-            console.log('Inactive account:', rollNumber);
             return res.status(401).json({ 
                 message: "Account is inactive" 
             });
@@ -55,7 +51,6 @@ studentApp.post('/login', expressAsyncHandler(async (req, res) => {
         // Compare password using the method we added to the schema
         const passwordMatch = await student.comparePassword(password);
         
-        console.log('Password match result:', passwordMatch);
 
         if (!passwordMatch) {
             return res.status(401).json({ 
@@ -92,7 +87,6 @@ studentApp.post('/login', expressAsyncHandler(async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Login error:', error);
         res.status(500).json({ 
             message: "Server error", 
             error: error.message 
@@ -272,10 +266,6 @@ studentApp.post('/signup', expressAsyncHandler(async (req, res) => {
 
         const savedStudent = await newStudent.save();
         
-        console.log('Student registered successfully:', {
-            rollNumber: savedStudent.rollNumber,
-            email: savedStudent.email
-        });
 
         res.status(201).json({ 
             message: "Student registered successfully", 
@@ -288,7 +278,6 @@ studentApp.post('/signup', expressAsyncHandler(async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Signup error:', error);
         res.status(500).json({ error: error.message });
     }
 }));

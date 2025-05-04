@@ -77,22 +77,23 @@ const styles = {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#FFF9E6', // Light yellow background
         padding: '20px',
     },
     formCard: {
         backgroundColor: '#ffffff',
         borderRadius: '12px',
         padding: '40px',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)',
         width: '100%',
         maxWidth: '500px',
+        borderTop: '5px solid #FFAE00', // Yellow accent border
     },
     title: {
         textAlign: 'center',
         color: '#333',
         marginBottom: '30px',
-        fontSize: '24px',
+        fontSize: '28px',
         fontWeight: 'bold',
     },
     form: {
@@ -106,7 +107,7 @@ const styles = {
         gap: '5px',
     },
     input: {
-        padding: '12px',
+        padding: '14px',
         borderRadius: '6px',
         border: '1px solid #ddd',
         fontSize: '16px',
@@ -119,7 +120,7 @@ const styles = {
         marginTop: '4px',
     },
     button: {
-        backgroundColor: '#2563eb',
+        backgroundColor: '#FFAE00', // Yellow button
         color: '#fff',
         padding: '14px',
         borderRadius: '6px',
@@ -132,7 +133,4 @@ const styles = {
 };
 
 export default AdminLogin;
-
-
-
 

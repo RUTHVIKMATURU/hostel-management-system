@@ -47,12 +47,17 @@ const styles = {
         fontWeight: '500',
     },
     logoutButton: {
-        backgroundColor: '#dc2626',
+        backgroundColor: '#FFAE00', // Changed from red to yellow
         color: 'white',
         border: 'none',
         padding: '0.5rem 1rem',
         borderRadius: '0.375rem',
         cursor: 'pointer',
+        fontWeight: '500',
+        transition: 'background-color 0.2s',
+        ':hover': {
+            backgroundColor: '#E59D00', // Darker yellow on hover
+        },
     },
     main: {
         padding: '2rem',
@@ -60,4 +65,5 @@ const styles = {
 };
 
 export default AdminNavbar;
+
 

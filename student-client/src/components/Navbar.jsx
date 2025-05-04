@@ -145,14 +145,14 @@ const styles = {
     },
     logoutButton: {
         padding: '0.5rem 1rem',
-        backgroundColor: '#ff4444',
+        backgroundColor: '#FFAE00',
         color: '#fff',
         border: 'none',
         borderRadius: '4px',
         cursor: 'pointer',
         transition: 'background-color 0.2s',
         ':hover': {
-            backgroundColor: '#cc0000',
+            backgroundColor: '#E59D00',
         },
     },
 };

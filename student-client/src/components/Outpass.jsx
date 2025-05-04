@@ -51,40 +51,72 @@ function Outpass() {
             <h2 style={{ textAlign: 'center', marginBottom: '2rem' }}>Apply for Outpass</h2>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="mb-3">
-                    <label className="form-label">Out Time</label>
+                    <label className="form-label" style={{ color: '#333', fontWeight: '500' }}>Out Time</label>
                     <input
                         type="datetime-local"
                         className="form-control"
                         {...register('outTime', { required: 'Out time is required' })}
+                        style={{ 
+                            borderColor: '#FFE082',
+                            borderRadius: '5px',
+                            padding: '10px',
+                            outline: 'none',
+                            boxShadow: 'none',
+                            transition: 'border-color 0.3s'
+                        }}
                     />
                     {errors.outTime && <small style={{ color: 'red' }}>{errors.outTime.message}</small>}
                 </div>
 
                 <div className="mb-3">
-                    <label className="form-label">In Time</label>
+                    <label className="form-label" style={{ color: '#333', fontWeight: '500' }}>In Time</label>
                     <input
                         type="datetime-local"
                         className="form-control"
                         {...register('inTime', { required: 'In time is required' })}
+                        style={{ 
+                            borderColor: '#FFE082',
+                            borderRadius: '5px',
+                            padding: '10px',
+                            outline: 'none',
+                            boxShadow: 'none',
+                            transition: 'border-color 0.3s'
+                        }}
                     />
                     {errors.inTime && <small style={{ color: 'red' }}>{errors.inTime.message}</small>}
                 </div>
 
                 <div className="mb-3">
-                    <label className="form-label">Reason for Outpass</label>
+                    <label className="form-label" style={{ color: '#333', fontWeight: '500' }}>Reason for Outpass</label>
                     <textarea
                         className="form-control"
                         placeholder="Enter reason"
                         {...register('reason', { required: 'Reason is required', maxLength: 200 })}
+                        style={{ 
+                            borderColor: '#FFE082',
+                            borderRadius: '5px',
+                            padding: '10px',
+                            outline: 'none',
+                            boxShadow: 'none',
+                            transition: 'border-color 0.3s'
+                        }}
                     />
                     {errors.reason && <small style={{ color: 'red' }}>{errors.reason.message}</small>}
                 </div>
 
                 <div className="mb-3">
-                    <label className="form-label">Outpass Type</label>
+                    <label className="form-label" style={{ color: '#333', fontWeight: '500' }}>Outpass Type</label>
                     <select
                         className="form-control"
                         {...register('type', { required: 'Type of outpass is required' })}
+                        style={{ 
+                            borderColor: '#FFE082',
+                            borderRadius: '5px',
+                            padding: '10px',
+                            outline: 'none',
+                            boxShadow: 'none',
+                            transition: 'border-color 0.3s'
+                        }}
                     >
                         <option value="">Select Type</option>
                         <option value="late pass">Late Pass</option>
@@ -93,7 +125,24 @@ function Outpass() {
                     {errors.type && <small style={{ color: 'red' }}>{errors.type.message}</small>}
                 </div>
 
-                <button type="submit" className="btn btn-primary w-100">Submit Outpass</button>
+                <button 
+                    type="submit" 
+                    className="btn" 
+                    style={{
+                        backgroundColor: '#FFAE00',
+                        color: 'white',
+                        border: 'none',
+                        padding: '10px 20px',
+                        borderRadius: '5px',
+                        fontWeight: '500',
+                        width: '100%',
+                        marginTop: '20px',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.3s'
+                    }}
+                >
+                    Submit Outpass
+                </button>
             </form>
         </div>
     );

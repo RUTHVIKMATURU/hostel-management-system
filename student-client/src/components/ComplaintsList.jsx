@@ -22,9 +22,9 @@ const ComplaintsList = () => {
         fetchComplaints();
     }, [user.rollNumber]);
 
-    if (loading) return <p>Loading complaints...</p>;
-    if (error) return <p style={{ color: 'red' }}>{error}</p>;
-    if (complaints.length === 0) return <p>No complaints found.</p>;
+    if (loading) return <p style={{ textAlign: 'center', padding: '2rem', color: '#E59D00' }}>Loading complaints...</p>;
+    if (error) return <p style={{ color: 'red', textAlign: 'center', padding: '2rem' }}>{error}</p>;
+    if (complaints.length === 0) return <p style={{ textAlign: 'center', padding: '2rem', color: '#E59D00' }}>No complaints found.</p>;
 
     return (
         <div style={styles.container}>
@@ -57,9 +57,10 @@ const ComplaintsList = () => {
 
 const getStatusStyle = (status) => {
     switch (status) {
-        case 'pending': return { color: '#FFA500', backgroundColor: '#FFF7E6' };
-        case 'resolved': return { color: '#4CAF50', backgroundColor: '#E8F5E9' };
-        case 'rejected': return { color: '#FF0000', backgroundColor: '#FFEBEE' };
+        case 'pending': return { color: '#E59D00', backgroundColor: '#FFF9E6' }; // Yellow for pending
+        case 'active': return { color: '#E59D00', backgroundColor: '#FFF9E6' }; // Yellow for active
+        case 'solved': return { color: '#4CAF50', backgroundColor: '#E8F5E9' }; // Keep green for solved
+        case 'rejected': return { color: '#FF0000', backgroundColor: '#FFEBEE' }; // Keep red for rejected
         default: return { color: '#000', backgroundColor: '#F0F0F0' };
     }
 };
@@ -72,11 +73,12 @@ const styles = {
         boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
         borderRadius: '12px',
         background: '#FFF',
+        borderTop: '5px solid #FFAE00', // Added yellow accent border
     },
     title: {
         textAlign: 'center',
         marginBottom: '2rem',
-        color: '#333',
+        color: '#E59D00', // Changed to darker yellow
         fontSize: '2rem',
         fontWeight: 'bold',
     },
@@ -86,17 +88,20 @@ const styles = {
     },
     th: {
         padding: '12px',
-        backgroundColor: '#1E1E2F',
+        backgroundColor: '#FFAE00', // Changed to primary yellow
         color: '#FFF',
         textAlign: 'left',
         fontWeight: '600',
     },
     td: {
         padding: '10px 15px',
-        borderBottom: '1px solid #ccc',
+        borderBottom: '1px solid #FFE082', // Changed to light yellow
     },
     row: {
         transition: 'background-color 0.3s',
+        ':hover': {
+            backgroundColor: '#FFF9E6', // Light yellow on hover
+        }
     },
 };
 

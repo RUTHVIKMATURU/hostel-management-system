@@ -9,7 +9,7 @@ const OutpassPage = () => {
     const tabHeaderStyle = {
         display: 'flex',
         justifyContent: 'center',
-        borderBottom: '1px solid #dee2e6',
+        borderBottom: '1px solid #FFE082', // Changed to light yellow
         marginBottom: '2rem'
     };
 
@@ -25,13 +25,13 @@ const OutpassPage = () => {
 
     const activeTabStyle = {
         ...tabStyle,
-        borderBottom: '3px solid #0d6efd',
-        color: '#0d6efd'
+        borderBottom: '3px solid #FFAE00', // Changed to primary yellow
+        color: '#FFAE00' // Changed to primary yellow
     };
 
     return (
-        <div style={{ padding: '2rem' }}>
-            <h2 style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <div style={{ padding: '2rem', backgroundColor: '#FFF9E6' }}> {/* Added light yellow background */}
+            <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: '#E59D00' }}> {/* Changed to darker yellow */}
                 <Megaphone size={32} style={{ marginRight: '10px' }} /> OUTPASS SECTION
             </h2>
 

@@ -15,7 +15,7 @@ const ComplaintManagement = () => {
         try {
             setLoading(true);
             console.log('Fetching complaints...');
-            const response = await axios.get('/admin-api/get-complaints'); // Updated endpoint
+            const response = await axios.get('/admin-api/get-complaints');
             console.log('Complaints response:', response.data);
             setComplaints(response.data);
             setError(null);

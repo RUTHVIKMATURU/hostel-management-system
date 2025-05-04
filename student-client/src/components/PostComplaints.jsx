@@ -38,12 +38,20 @@ const PostComplaint = () => {
 
             <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                    <label className="form-label">Category</label>
+                    <label className="form-label" style={{ color: '#333', fontWeight: '500' }}>Category</label>
                     <select
                         className="form-control"
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
                         required
+                        style={{ 
+                            borderColor: '#FFE082',
+                            borderRadius: '5px',
+                            padding: '10px',
+                            outline: 'none',
+                            boxShadow: 'none',
+                            transition: 'border-color 0.3s'
+                        }}
                     >
                         <option value="">Select Category</option>
                         <option value="network related">Network Related</option>
@@ -58,17 +66,42 @@ const PostComplaint = () => {
                 </div>
 
                 <div className="mb-3">
-                    <label className="form-label">Description</label>
+                    <label className="form-label" style={{ color: '#333', fontWeight: '500' }}>Description</label>
                     <textarea
                         className="form-control"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="Describe your issue"
                         required
+                        style={{ 
+                            borderColor: '#FFE082',
+                            borderRadius: '5px',
+                            padding: '10px',
+                            outline: 'none',
+                            boxShadow: 'none',
+                            transition: 'border-color 0.3s'
+                        }}
                     />
                 </div>
 
-                <button type="submit" className="btn btn-primary w-100">Submit Complaint</button>
+                <button 
+                    type="submit" 
+                    className="btn" 
+                    style={{
+                        backgroundColor: '#FFAE00',
+                        color: 'white',
+                        border: 'none',
+                        padding: '10px 20px',
+                        borderRadius: '5px',
+                        fontWeight: '500',
+                        width: '100%',
+                        marginTop: '20px',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.3s'
+                    }}
+                >
+                    Submit Complaint
+                </button>
             </form>
         </div>
     );

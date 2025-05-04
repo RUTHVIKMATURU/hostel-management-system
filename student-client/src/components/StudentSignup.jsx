@@ -45,10 +45,17 @@ const StudentSignup = () => {
                             style={styles.select}
                         >
                             <option value="">Select Branch</option>
-                            <option value="CSE">CSE</option>
-                            <option value="ECE">ECE</option>
-                            <option value="EEE">EEE</option>
-                            <option value="MECH">MECH</option>
+                            <option value="CSE">Computer Science and Engineering (CSE)</option>
+                            <option value="CSE-AIML">CSE - Artificial Intelligence and Machine Learning</option>
+                            <option value="CSE-DS">CSE - Data Science</option>
+                            <option value="CSE-CYS">CSE - Cyber Security</option>
+                            <option value="CSE-IOT">CSE - Internet of Things</option>
+                            <option value="IT">Information Technology (IT)</option>
+                            <option value="ECE">Electronics and Communication Engineering (ECE)</option>
+                            <option value="EEE">Electrical and Electronics Engineering (EEE)</option>
+                            <option value="MECH">Mechanical Engineering</option>
+                            <option value="CIVIL">Civil Engineering</option>
+                            <option value="AUTO">Automobile Engineering</option>
                         </select>
                         {errors.branch && <span style={styles.error}>{errors.branch.message}</span>}
                     </div>
@@ -242,3 +249,4 @@ const styles = {
 };
 
 export default StudentSignup;
+

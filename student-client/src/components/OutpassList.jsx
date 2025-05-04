@@ -42,11 +42,11 @@ const OutpassList = () => {
     }, [user?.rollNumber]);
 
     if (!user) {
-        return <div style={{ textAlign: 'center', padding: '2rem' }}>Please log in to view outpass history</div>;
+        return <div style={{ textAlign: 'center', padding: '2rem', color: '#E59D00' }}>Please log in to view outpass history</div>;
     }
 
     if (loading) {
-        return <div style={{ textAlign: 'center', padding: '2rem' }}>Loading outpass history...</div>;
+        return <div style={{ textAlign: 'center', padding: '2rem', color: '#E59D00' }}>Loading outpass history...</div>;
     }
 
     if (error) {
@@ -59,23 +59,23 @@ const OutpassList = () => {
 
     return (
         <div style={{ maxWidth: '900px', margin: '2rem auto' }}>
-            <h2 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>My Outpass Requests</h2>
+            <h2 style={{ textAlign: 'center', marginBottom: '1.5rem', color: '#E59D00' }}>My Outpass Requests</h2>
             {outpasses.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '2rem', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
-                    <p>No outpass requests found.</p>
+                <div style={{ textAlign: 'center', padding: '2rem', backgroundColor: '#FFF9E6', borderRadius: '8px', border: '1px solid #FFE082' }}>
+                    <p style={{ color: '#E59D00', fontWeight: '500' }}>No outpass requests found.</p>
                     <p style={{ fontSize: '0.9rem', color: '#666' }}>
                         Your outpass history will appear here once you submit requests.
                     </p>
                 </div>
             ) : (
-                <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '8px', overflow: 'hidden', borderTop: '5px solid #FFAE00' }}>
                     <thead>
-                        <tr style={{ backgroundColor: '#f8f9fa' }}>
-                            <th style={styles.th}>Out Time</th>
-                            <th style={styles.th}>In Time</th>
-                            <th style={styles.th}>Reason</th>
-                            <th style={styles.th}>Type</th>
-                            <th style={styles.th}>Status</th>
+                        <tr style={{ backgroundColor: '#FFAE00' }}>
+                            <th style={{ ...styles.th, color: 'white' }}>Out Time</th>
+                            <th style={{ ...styles.th, color: 'white' }}>In Time</th>
+                            <th style={{ ...styles.th, color: 'white' }}>Reason</th>
+                            <th style={{ ...styles.th, color: 'white' }}>Type</th>
+                            <th style={{ ...styles.th, color: 'white' }}>Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -99,9 +99,9 @@ const OutpassList = () => {
 
 const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
-        case 'pending': return '#FFA500';
-        case 'accepted': return '#4CAF50';
-        case 'rejected': return '#FF0000';
+        case 'pending': return '#FFAE00'; // Changed to primary yellow
+        case 'accepted': return '#4CAF50'; // Keep green for accepted
+        case 'rejected': return '#FF0000'; // Keep red for rejected
         default: return '#000';
     }
 };
@@ -110,17 +110,17 @@ const styles = {
     th: {
         padding: '12px 16px',
         textAlign: 'left',
-        borderBottom: '2px solid #dee2e6',
+        borderBottom: '2px solid #FFE082', // Changed to light yellow
         color: '#495057',
         fontWeight: '600'
     },
     td: {
         padding: '12px 16px',
-        borderBottom: '1px solid #dee2e6'
+        borderBottom: '1px solid #FFE082' // Changed to light yellow
     },
     tr: {
         '&:hover': {
-            backgroundColor: '#f8f9fa'
+            backgroundColor: '#FFF9E6' // Light yellow on hover
         }
     }
 };
