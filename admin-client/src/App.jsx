@@ -5,6 +5,7 @@ import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
 import StudentManagement from './components/StudentManagement';
 import ComplaintManagement from './components/ComplaintManagement';
+import RequestManagement from './components/RequestManagement';
 import AdminPrivateRoute from './components/AdminPrivateRoute';
 import AdminNavbar from './components/AdminNavbar';
 
@@ -34,6 +35,11 @@ function App() {
             <Route path="complaints" element={
               <AdminPrivateRoute>
                 <ComplaintManagement />
+              </AdminPrivateRoute>
+            } />
+            <Route path="requests" element={
+              <AdminPrivateRoute>
+                <RequestManagement />
               </AdminPrivateRoute>
             } />
           </Route>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axiosInstance from '../utils/axiosConfig';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 
@@ -9,24 +9,38 @@ const PostComplaint = () => {
     const [category, setCategory] = useState('');
     const [description, setDescription] = useState('');
     const [error, setError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsSubmitting(true);
         try {
-            console.log('user data: ',user)
+            console.log('Submitting complaint for user:', user);
             const payload = {
                 category,
                 description,
                 complaintBy: user.rollNumber
             };
-            console.log(payload)
+            console.log('Complaint payload:', payload);
 
-            const response = await axios.post('http://localhost:3000/student-api/post-complaint', payload);
+            const response = await axiosInstance.post('/student-api/post-complaint', payload);
+            console.log('Complaint submission response:', response.data);
 
+            // Clear form
+            setCategory('');
+            setDescription('');
+            
+            // Show success message
             alert(response.data.message || 'Complaint submitted successfully!');
-            navigate('/home');
+            
+            // Force a page reload when navigating to ensure fresh data
+            navigate('/complaints/complaint-list', { state: { refresh: true } });
+            window.location.reload(); // Force reload to clear any cached data
         } catch (error) {
+            console.error('Error submitting complaint:', error);
             setError(error.response?.data?.error || 'Failed to submit complaint');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -53,7 +67,7 @@ const PostComplaint = () => {
                             transition: 'border-color 0.3s'
                         }}
                     >
-                        <option value="">Select Category</option>
+                        <option value="">Select a category</option>
                         <option value="network related">Network Related</option>
                         <option value="food">Food</option>
                         <option value="water">Water</option>
@@ -87,8 +101,9 @@ const PostComplaint = () => {
                 <button 
                     type="submit" 
                     className="btn" 
+                    disabled={isSubmitting}
                     style={{
-                        backgroundColor: '#FFAE00',
+                        backgroundColor: isSubmitting ? '#FFD180' : '#FFAE00',
                         color: 'white',
                         border: 'none',
                         padding: '10px 20px',
@@ -96,11 +111,11 @@ const PostComplaint = () => {
                         fontWeight: '500',
                         width: '100%',
                         marginTop: '20px',
-                        cursor: 'pointer',
+                        cursor: isSubmitting ? 'not-allowed' : 'pointer',
                         transition: 'background-color 0.3s'
                     }}
                 >
-                    Submit Complaint
+                    {isSubmitting ? 'Submitting...' : 'Submit Complaint'}
                 </button>
             </form>
         </div>

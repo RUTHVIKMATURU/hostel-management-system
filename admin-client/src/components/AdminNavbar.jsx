@@ -16,6 +16,7 @@ const AdminNavbar = () => {
                     <Link to="/dashboard" style={styles.link}>Dashboard</Link>
                     <Link to="/students" style={styles.link}>Students</Link>
                     <Link to="/complaints" style={styles.link}>Complaints</Link>
+                    <Link to="/requests" style={styles.link}>Outpass Requests</Link>
                 </div>
                 <button onClick={handleLogout} style={styles.logoutButton}>
                     Logout
@@ -30,40 +31,46 @@ const AdminNavbar = () => {
 
 const styles = {
     nav: {
-        backgroundColor: '#2563eb',
-        padding: '1rem',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
+        padding: '1rem 2rem',
+        backgroundColor: '#FFAE00', // Updated to yellow
+        color: 'white',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
     },
     navLinks: {
         display: 'flex',
-        gap: '2rem',
+        gap: '1.5rem'
     },
     link: {
         color: 'white',
         textDecoration: 'none',
-        fontSize: '1rem',
         fontWeight: '500',
+        padding: '0.5rem 0',
+        borderBottom: '2px solid transparent',
+        transition: 'border-color 0.3s',
+        '&:hover': {
+            borderColor: 'white'
+        }
     },
     logoutButton: {
-        backgroundColor: '#FFAE00', // Changed from red to yellow
-        color: 'white',
+        backgroundColor: 'white',
+        color: '#FFAE00', // Updated to yellow
         border: 'none',
         padding: '0.5rem 1rem',
-        borderRadius: '0.375rem',
+        borderRadius: '4px',
         cursor: 'pointer',
         fontWeight: '500',
-        transition: 'background-color 0.2s',
-        ':hover': {
-            backgroundColor: '#E59D00', // Darker yellow on hover
-        },
+        transition: 'background-color 0.3s',
+        '&:hover': {
+            backgroundColor: '#f0f0f0'
+        }
     },
     main: {
-        padding: '2rem',
+        padding: '2rem'
     }
 };
 
 export default AdminNavbar;
-
 

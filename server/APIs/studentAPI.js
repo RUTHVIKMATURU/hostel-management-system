@@ -145,9 +145,15 @@ studentApp.post('/post-complaint', expressAsyncHandler(async (req, res) => {
 studentApp.get('/get-complaints/:rollNumber', expressAsyncHandler(async (req, res) => {
     try {
         const { rollNumber } = req.params;
+        console.log('Fetching complaints for roll number:', rollNumber);
+        
         const complaints = await Complaint.find({ complaintBy: rollNumber }).sort({ createdAt: -1 });
+        console.log('Found complaints:', complaints.length);
+        
+        // Return the array directly
         res.status(200).json(complaints);
     } catch (error) {
+        console.error('Error in get-complaints:', error);
         res.status(500).json({ error: error.message });
     }
 }));

@@ -315,6 +315,16 @@ adminApp.get('/pending-outpasses', expressAsyncHandler(async (req, res) => {
     }
 }));
 
+// Add this new endpoint to get all outpasses (not just pending ones)
+adminApp.get('/all-outpasses', expressAsyncHandler(async (req, res) => {
+    try {
+        const allOutpasses = await Outpass.find().sort({ createdAt: -1 });
+        res.status(200).json({ outpasses: allOutpasses });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}));
+
 // Update student details
 adminApp.put('/student-update/:rollNumber', expressAsyncHandler(async (req, res) => {
     try {
@@ -485,8 +495,7 @@ adminApp.get('/verify-token', verifyAdmin, (req, res) => {
 adminApp.get('/requests', expressAsyncHandler(async (req, res) => {
     try {
         const outpasses = await Outpass.find()
-            .sort({ createdAt: -1 })
-            .populate('studentId', 'name rollNumber');
+            .sort({ createdAt: -1 });
         res.status(200).json(outpasses);
     } catch (error) {
         res.status(500).json({ error: error.message });

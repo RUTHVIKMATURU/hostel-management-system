@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import '../HomeStyles.css'; // Updated import path
 
 const Home = () => {
     const [studentInfo, setStudentInfo] = useState(null);
     const [recentAnnouncements, setRecentAnnouncements] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [activeCard, setActiveCard] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -20,55 +22,39 @@ const Home = () => {
         const fetchAnnouncements = async () => {
             try {
                 setLoading(true);
-                // Try with port 3000 instead of 4000
                 const response = await axios.get('http://localhost:3000/student-api/all-announcements', {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('studentToken')}`
                     }
                 });
                 
-                console.log('Fetched announcements:', response.data);
-                
                 // Filter announcements from the last 2 days
                 const twoDaysAgo = new Date();
                 twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-                console.log('Two days ago:', twoDaysAgo);
                 
                 const recentAnnouncements = response.data.filter(announcement => {
-                    // Fix: Handle both createdAt and dateTime fields
                     const dateField = announcement.createdAt || announcement.dateTime;
-                    console.log('Announcement date field:', dateField);
-                    
-                    // Fix: Ensure proper date parsing
                     const announcementDate = new Date(dateField);
-                    console.log('Parsed announcement date:', announcementDate);
                     
-                    // Check if date is valid before comparison
                     if (isNaN(announcementDate.getTime())) {
-                        console.error('Invalid date for announcement:', announcement);
                         return false;
                     }
                     
-                    const isRecent = announcementDate >= twoDaysAgo;
-                    console.log('Is recent:', isRecent);
-                    return isRecent;
+                    return announcementDate >= twoDaysAgo;
                 });
                 
-                console.log('Filtered recent announcements:', recentAnnouncements);
                 setRecentAnnouncements(recentAnnouncements);
+                setError(null);
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching announcements:', error);
-                console.error('Error details:', error.response?.data || error.message);
-                setError('Failed to load announcements. Please try again later.');
+                setError('Failed to load recent announcements. Please try again later.');
                 setLoading(false);
                 
                 // Try to fetch without authentication as fallback
                 try {
                     const fallbackResponse = await axios.get('http://localhost:3000/student-api/all-announcements');
                     if (fallbackResponse.data && Array.isArray(fallbackResponse.data)) {
-                        console.log('Fallback fetch successful:', fallbackResponse.data);
-                        
                         const twoDaysAgo = new Date();
                         twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
                         
@@ -89,204 +75,154 @@ const Home = () => {
         };
 
         fetchAnnouncements();
+        
+        // Add animation classes with delay for staggered entrance
+        const timer = setTimeout(() => {
+            document.querySelector('.welcome-section').classList.add('animate-in');
+            
+            setTimeout(() => {
+                document.querySelector('.quick-links-section').classList.add('animate-in');
+                
+                setTimeout(() => {
+                    document.querySelector('.announcements-section').classList.add('animate-in');
+                }, 200);
+            }, 200);
+        }, 100);
+        
+        return () => clearTimeout(timer);
     }, []);
 
     const handleQuickLinkClick = (path) => {
         navigate(path);
     };
+    
+    const quickLinks = [
+        {
+            title: 'Outpass',
+            description: 'Apply for hostel outpass',
+            icon: 'bi-box-arrow-right',
+            path: '/outpass',
+            color: '#FF6B6B'
+        },
+        {
+            title: 'Complaints',
+            description: 'Register your complaints',
+            icon: 'bi-exclamation-triangle',
+            path: '/complaints/complaint',
+            color: '#4ECDC4'
+        },
+        {
+            title: 'Announcements',
+            description: 'View latest updates',
+            icon: 'bi-megaphone',
+            path: '/announcements/all',
+            color: '#FFD166'
+        }
+    ];
 
     return (
-        <div style={styles.container}>
+        <div className="home-container">
             {/* Welcome Section */}
-            <section style={styles.welcomeSection}>
-                <h1 style={styles.welcomeTitle}>
-                    Welcome, {studentInfo?.name || 'Student'}!
-                </h1>
-                <p style={styles.welcomeText}>
-                    Access all your hostel services and information in one place.
-                </p>
-            </section>
-
-            {/* Quick Links */}
-            <section style={styles.quickLinksSection}>
-                <h2 style={styles.sectionTitle}>Quick Links</h2>
-                <div style={styles.quickLinksGrid}>
-                    <div 
-                        style={styles.quickLink} 
-                        onClick={() => handleQuickLinkClick('/outpass')}
-                    >
-                        <h3>Outpass</h3>
-                        <p>Apply for hostel outpass</p>
-                    </div>
-                    <div 
-                        style={styles.quickLink}
-                        onClick={() => handleQuickLinkClick('/complaints/complaint')}
-                    >
-                        <h3>Complaints</h3>
-                        <p>Register your complaints</p>
-                    </div>
-                    <div 
-                        style={styles.quickLink}
-                        onClick={() => handleQuickLinkClick('/announcements/all')}
-                    >
-                        <h3>Announcements</h3>
-                        <p>View latest updates</p>
+            <section className="welcome-section">
+                <div className="welcome-content">
+                    <h1 className="welcome-title">
+                        Welcome, <span className="student-name">{studentInfo?.name || 'Student'}</span>!
+                    </h1>
+                    <p className="welcome-text">
+                        Access all your hostel services and information in one place.
+                    </p>
+                    <div className="welcome-decoration">
+                        <div className="decoration-circle circle-1"></div>
+                        <div className="decoration-circle circle-2"></div>
+                        <div className="decoration-circle circle-3"></div>
                     </div>
                 </div>
             </section>
 
+            {/* Quick Links */}
+            <section className="quick-links-section">
+                <h2 className="section-title">Quick Links</h2>
+                <div className="quick-links-grid">
+                    {quickLinks.map((link, index) => (
+                        <div 
+                            key={index}
+                            className={`quick-link-card ${activeCard === index ? 'active' : ''}`}
+                            onClick={() => handleQuickLinkClick(link.path)}
+                            onMouseEnter={() => setActiveCard(index)}
+                            onMouseLeave={() => setActiveCard(null)}
+                            style={{'--card-color': link.color}}
+                        >
+                            <div className="quick-link-icon">
+                                <i className={`bi ${link.icon}`}></i>
+                            </div>
+                            <h3 className="quick-link-title">{link.title}</h3>
+                            <p className="quick-link-description">{link.description}</p>
+                            <div className="quick-link-arrow">
+                                <i className="bi bi-arrow-right"></i>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
             {/* Recent Announcements (Last 2 Days) */}
-            <section style={styles.announcementsSection}>
-                <h2 style={styles.sectionTitle}>Recent Announcements (Last 2 Days)</h2>
-                <div style={styles.announcementsList}>
+            <section className="announcements-section">
+                <h2 className="section-title">Recent Announcements <span className="subtitle">(Last 2 Days)</span></h2>
+                <div className="announcements-list">
                     {loading ? (
-                        <div style={styles.loadingMessage}>Loading announcements...</div>
+                        <div className="loading-container">
+                            <div className="loading-spinner"></div>
+                            <p>Loading announcements...</p>
+                        </div>
                     ) : error ? (
-                        <div style={styles.errorMessage}>
-                            {error}
+                        <div className="error-container">
+                            <i className="bi bi-exclamation-circle"></i>
+                            <p>{error}</p>
                             <button 
                                 onClick={() => window.location.reload()} 
-                                style={{
-                                    marginTop: '10px',
-                                    padding: '8px 16px',
-                                    backgroundColor: '#FFAE00',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer'
-                                }}
+                                className="retry-button"
                             >
-                                Retry
+                                <i className="bi bi-arrow-clockwise"></i> Retry
                             </button>
                         </div>
                     ) : recentAnnouncements.length > 0 ? (
                         recentAnnouncements.map((announcement, index) => (
-                            <div key={index} style={styles.announcementCard}>
-                                <h3 style={styles.announcementTitle}>{announcement.title}</h3>
-                                <p style={styles.announcementDate}>
+                            <div key={index} className="announcement-card" style={{'--delay': `${index * 0.1}s`}}>
+                                <div className="announcement-header">
+                                    <h3 className="announcement-title">{announcement.title}</h3>
+                                    <span className="announcement-badge">New</span>
+                                </div>
+                                <p className="announcement-date">
+                                    <i className="bi bi-calendar-event"></i>
                                     {new Date(announcement.createdAt || announcement.dateTime).toLocaleDateString()} 
                                     {" "}
+                                    <i className="bi bi-clock"></i>
                                     {new Date(announcement.createdAt || announcement.dateTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                                 </p>
-                                <p style={styles.announcementContent}>{announcement.description || announcement.content}</p>
+                                <p className="announcement-content">{announcement.description || announcement.content}</p>
+                                <div className="announcement-footer">
+                                    <button className="read-more-button">
+                                        Read More <i className="bi bi-chevron-right"></i>
+                                    </button>
+                                </div>
                             </div>
                         ))
                     ) : (
-                        <div style={styles.noAnnouncementsMessage}>
-                            No announcements in the last 2 days.
+                        <div className="empty-container">
+                            <i className="bi bi-info-circle"></i>
+                            <p>No announcements in the last 2 days.</p>
+                            <button 
+                                onClick={() => navigate('/announcements/all')} 
+                                className="view-all-button"
+                            >
+                                View All Announcements
+                            </button>
                         </div>
                     )}
                 </div>
             </section>
         </div>
     );
-};
-
-const styles = {
-    container: {
-        padding: '20px',
-        maxWidth: '1200px',
-        margin: '0 auto',
-    },
-    welcomeSection: {
-        backgroundColor: '#f8f9fa',
-        padding: '40px',
-        borderRadius: '10px',
-        marginBottom: '30px',
-        textAlign: 'center',
-    },
-    welcomeTitle: {
-        fontSize: '2.5rem',
-        color: '#333',
-        marginBottom: '15px',
-    },
-    welcomeText: {
-        fontSize: '1.2rem',
-        color: '#666',
-    },
-    quickLinksSection: {
-        marginBottom: '30px',
-    },
-    sectionTitle: {
-        fontSize: '1.8rem',
-        color: '#333',
-        marginBottom: '20px',
-    },
-    quickLinksGrid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-        gap: '20px',
-    },
-    quickLink: {
-        backgroundColor: '#fff',
-        padding: '20px',
-        borderRadius: '8px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        transition: 'transform 0.2s, box-shadow 0.2s',
-        cursor: 'pointer',
-        '&:hover': {
-            transform: 'translateY(-5px)',
-            boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
-        },
-    },
-    announcementsSection: {
-        marginTop: '30px',
-    },
-    announcementsList: {
-        display: 'grid',
-        gap: '20px',
-    },
-    announcementCard: {
-        backgroundColor: '#fff',
-        padding: '20px',
-        borderRadius: '8px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        marginBottom: '15px',
-        borderLeft: '4px solid #FFAE00', // Yellow accent
-    },
-    announcementTitle: {
-        fontSize: '1.2rem',
-        color: '#333',
-        marginBottom: '10px',
-    },
-    announcementDate: {
-        color: '#666',
-        fontSize: '0.9rem',
-        marginBottom: '10px',
-        fontStyle: 'italic',
-    },
-    announcementContent: {
-        color: '#444',
-    },
-    noAnnouncementsMessage: {
-        padding: '20px',
-        backgroundColor: '#fff',
-        borderRadius: '8px',
-        textAlign: 'center',
-        color: '#666',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        borderLeft: '4px solid #FFAE00', // Yellow accent
-    },
-    loadingMessage: {
-        padding: '20px',
-        backgroundColor: '#fff',
-        borderRadius: '8px',
-        textAlign: 'center',
-        color: '#666',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-    },
-    errorMessage: {
-        padding: '20px',
-        backgroundColor: '#fff',
-        borderRadius: '8px',
-        textAlign: 'center',
-        color: 'red',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        borderLeft: '4px solid red',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center'
-    },
 };
 
 export default Home;
