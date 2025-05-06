@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
                             Authorization: `Bearer ${token}`
                         }
                     });
-                    
+
                     if (response.data.valid) {
                         setAdmin(JSON.parse(adminInfo));
                         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
                     delete axios.defaults.headers.common['Authorization'];
                 }
             }
-            
+
             setLoading(false);
         };
 
@@ -55,8 +55,16 @@ export const AuthProvider = ({ children }) => {
         delete axios.defaults.headers.common['Authorization'];
     };
 
+    const updateAdmin = (updatedAdminData) => {
+        // Update admin data in state
+        setAdmin(updatedAdminData);
+
+        // Update admin data in local storage
+        localStorage.setItem('adminInfo', JSON.stringify(updatedAdminData));
+    };
+
     return (
-        <AuthContext.Provider value={{ admin, setAdmin, login, logout, loading }}>
+        <AuthContext.Provider value={{ admin, setAdmin, login, logout, loading, updateAdmin }}>
             {children}
         </AuthContext.Provider>
     );

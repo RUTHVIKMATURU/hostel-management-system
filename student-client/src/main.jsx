@@ -1,6 +1,13 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import './styles/darkTheme.css';
+import './styles/AnnouncementStyles.css';
+import './styles/ProfileStyles.css';
+import './styles/ComplaintStyles.css';
+import './styles/OutpassStyles.css';
+import './styles/LoginStyles.css';
+import './styles/SignupStyles.css';
 import './index.css';
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 import { UserProvider } from "./context/UserContext.jsx";
@@ -17,6 +24,7 @@ import Outpass from './components/Outpass.jsx';
 import StudentProfile from './components/StudentProfile.jsx';
 import TodayAnnouncements from './components/TodayAnnouncements.jsx';
 import AllAnnouncements from './components/AllAnnouncements.jsx';
+import AnnouncementDetail from './components/AnnouncementDetail.jsx';
 import OutpassPage from './components/OutpassPage.jsx';
 import OutpassList from './components/OutpassList.jsx';
 import PostComplaint from './components/PostComplaints.jsx';
@@ -50,6 +58,10 @@ const browserRouterObj = createBrowserRouter([
           { path: 'today', element: <TodayAnnouncements /> },
           { path: 'all', element: <AllAnnouncements /> }
         ]
+      },
+      {
+        path: 'announcements/:id',
+        element: <PrivateRoute><AnnouncementDetail /></PrivateRoute>
       },
       {
         path: 'complaints',

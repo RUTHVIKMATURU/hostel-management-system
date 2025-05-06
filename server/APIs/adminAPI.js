@@ -23,39 +23,39 @@ adminApp.get('/', (req, res) => {
 adminApp.post('/login', expressAsyncHandler(async (req, res) => {
     try {
         const { username, password } = req.body;
-        
+
         // Validate input
         if (!username || !password) {
-            return res.status(400).json({ 
-                message: "Username and password are required" 
+            return res.status(400).json({
+                message: "Username and password are required"
             });
         }
 
         // Find admin
         const admin = await Admin.findOne({ username });
-        
+
         if (!admin) {
-            return res.status(401).json({ 
-                message: "Invalid credentials" 
+            return res.status(401).json({
+                message: "Invalid credentials"
             });
         }
 
 
         // Compare password
         const isMatch = await admin.comparePassword(password);
-        
+
         if (!isMatch) {
-            return res.status(401).json({ 
-                message: "Invalid credentials" 
+            return res.status(401).json({
+                message: "Invalid credentials"
             });
         }
 
         // Generate token
         const token = jwt.sign(
-            { 
-                id: admin._id, 
+            {
+                id: admin._id,
                 role: 'admin',
-                username: admin.username 
+                username: admin.username
             },
             process.env.JWT_SECRET,
             { expiresIn: '1d' }
@@ -74,9 +74,9 @@ adminApp.post('/login', expressAsyncHandler(async (req, res) => {
         });
 
     } catch (error) {
-        res.status(500).json({ 
-            message: "Server error", 
-            error: error.message 
+        res.status(500).json({
+            message: "Server error",
+            error: error.message
         });
     }
 }));
@@ -196,7 +196,7 @@ adminApp.put('/edit-announcement/:id',expressAsyncHandler(async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-})); 
+}));
 
 
 // to read announcement
@@ -261,10 +261,16 @@ adminApp.get('/get-active-complaints', expressAsyncHandler(async (req, res) => {
 adminApp.put('/mark-complaint-solved/:id', expressAsyncHandler(async (req, res) => {
     try {
         const { id } = req.params;
+        const { adminReply } = req.body;
+
+        const updateData = {
+            status: 'solved',
+            ...(adminReply && { adminReply })
+        };
 
         const updatedComplaint = await Complaint.findByIdAndUpdate(
             id,
-            { status: 'solved' },
+            updateData,
             { new: true }
         );
 
@@ -273,6 +279,36 @@ adminApp.put('/mark-complaint-solved/:id', expressAsyncHandler(async (req, res) 
         }
 
         res.status(200).json({ message: "Complaint marked as solved", complaint: updatedComplaint });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}));
+
+// to add a reply to a complaint without changing status
+adminApp.put('/reply-to-complaint/:id', expressAsyncHandler(async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { adminReply } = req.body;
+
+        if (!adminReply) {
+            return res.status(400).json({ message: "Reply message is required" });
+        }
+
+        const updatedComplaint = await Complaint.findByIdAndUpdate(
+            id,
+            { adminReply },
+            { new: true }
+        );
+
+        if (!updatedComplaint) {
+            return res.status(404).json({ message: "Complaint not found" });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Reply added successfully",
+            complaint: updatedComplaint
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -330,11 +366,11 @@ adminApp.put('/student-update/:rollNumber', expressAsyncHandler(async (req, res)
     try {
         const { rollNumber } = req.params;
         const updateData = req.body;
-        
+
         // Remove sensitive fields that shouldn't be updated
         delete updateData.password;
         delete updateData.rollNumber;
-        
+
         const updatedStudent = await Student.findOneAndUpdate(
             { rollNumber },
             updateData,
@@ -355,20 +391,20 @@ adminApp.put('/student-update/:rollNumber', expressAsyncHandler(async (req, res)
 adminApp.post('/students/bulk', expressAsyncHandler(async (req, res) => {
     try {
         const { students, action } = req.body;
-        
+
         if (!students || !students.length) {
             return res.status(400).json({ message: "No students selected" });
         }
 
         const isActive = action === 'activate';
-        
+
         await Student.updateMany(
             { rollNumber: { $in: students } },
             { $set: { is_active: isActive } }
         );
 
-        res.status(200).json({ 
-            message: `Successfully ${action}d ${students.length} students` 
+        res.status(200).json({
+            message: `Successfully ${action}d ${students.length} students`
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -379,13 +415,13 @@ adminApp.post('/students/bulk', expressAsyncHandler(async (req, res) => {
 adminApp.get('/students', verifyAdmin, expressAsyncHandler(async (req, res) => {
     try {
         const { page = 1, limit = 10, status, search } = req.query;
-        
+
         let query = {};
-        
+
         if (status) {
             query.is_active = status === 'active';
         }
-        
+
         if (search) {
             query.$or = [
                 { name: { $regex: search, $options: 'i' } },
@@ -409,9 +445,9 @@ adminApp.get('/students', verifyAdmin, expressAsyncHandler(async (req, res) => {
         });
     } catch (error) {
         console.error('Server error:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             message: 'Failed to fetch students',
-            error: error.message 
+            error: error.message
         });
     }
 }));
@@ -419,16 +455,16 @@ adminApp.get('/students', verifyAdmin, expressAsyncHandler(async (req, res) => {
 // Add new student
 adminApp.post('/add-student', verifyAdmin, expressAsyncHandler(async (req, res) => {
     try {
-        const { 
-            name, 
-            rollNumber, 
-            branch, 
-            year, 
-            phoneNumber, 
-            email, 
-            parentMobileNumber, 
-            roomNumber, 
-            password 
+        const {
+            name,
+            rollNumber,
+            branch,
+            year,
+            phoneNumber,
+            email,
+            parentMobileNumber,
+            roomNumber,
+            password
         } = req.body;
 
         // Validate required fields
@@ -437,13 +473,13 @@ adminApp.post('/add-student', verifyAdmin, expressAsyncHandler(async (req, res) 
         }
 
         // Check if student already exists
-        const existingStudent = await Student.findOne({ 
-            $or: [{ rollNumber }, { email }] 
+        const existingStudent = await Student.findOne({
+            $or: [{ rollNumber }, { email }]
         });
 
         if (existingStudent) {
-            return res.status(400).json({ 
-                message: "Student already exists with this roll number or email" 
+            return res.status(400).json({
+                message: "Student already exists with this roll number or email"
             });
         }
 
@@ -462,8 +498,8 @@ adminApp.post('/add-student', verifyAdmin, expressAsyncHandler(async (req, res) 
 
         await newStudent.save();
 
-        res.status(201).json({ 
-            message: "Student added successfully", 
+        res.status(201).json({
+            message: "Student added successfully",
             student: {
                 name: newStudent.name,
                 rollNumber: newStudent.rollNumber,
@@ -479,12 +515,12 @@ adminApp.post('/add-student', verifyAdmin, expressAsyncHandler(async (req, res) 
 adminApp.get('/verify-token', verifyAdmin, (req, res) => {
     try {
         // If middleware passes, token is valid
-        res.json({ 
+        res.json({
             valid: true,
             admin: req.admin // The decoded admin info from the token
         });
     } catch (error) {
-        res.status(401).json({ 
+        res.status(401).json({
             valid: false,
             message: 'Invalid token'
         });
@@ -514,7 +550,7 @@ adminApp.put('/requests/:id', expressAsyncHandler(async (req, res) => {
 
         const updatedRequest = await Outpass.findByIdAndUpdate(
             id,
-            { 
+            {
                 status,
                 remarks,
                 updatedAt: Date.now()

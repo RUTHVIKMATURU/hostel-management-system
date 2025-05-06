@@ -27,6 +27,10 @@ const complaintSchema = new mongoose.Schema({
         type: String,
         enum: ['active', 'solved'],
         default: 'active'
+    },
+    adminReply: {
+        type: String,
+        default: null
     }
 }, { timestamps: true });
 

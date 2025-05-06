@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 
 const UserContext = createContext();
 
@@ -19,8 +20,42 @@ export const UserProvider = ({ children }) => {
         localStorage.removeItem('studentInfo');
     };
 
+    const updateProfile = async (updatedData) => {
+        try {
+            if (!user || !user.rollNumber) {
+                throw new Error('User not authenticated');
+            }
+
+            const token = localStorage.getItem('studentToken');
+            if (!token) {
+                throw new Error('Authentication token not found');
+            }
+
+            // Create a new endpoint for student profile update
+            const response = await axios.put(
+                `http://localhost:3000/student-api/update-profile/${user.rollNumber}`,
+                updatedData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            // Update local state and storage with the updated user data
+            const updatedUser = { ...user, ...response.data };
+            setUser(updatedUser);
+            localStorage.setItem('studentInfo', JSON.stringify(updatedUser));
+
+            return updatedUser;
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            throw error;
+        }
+    };
+
     return (
-        <UserContext.Provider value={{ user, login, logout }}>
+        <UserContext.Provider value={{ user, login, logout, updateProfile }}>
             {children}
         </UserContext.Provider>
     );

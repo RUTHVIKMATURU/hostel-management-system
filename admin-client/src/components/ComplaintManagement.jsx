@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
 import axios from '../utils/axios';
+import { AlertCircle, CheckCircle, XCircle, Search, Filter, RefreshCw, MessageSquare, Send } from 'lucide-react';
 
 const ComplaintManagement = () => {
     const [complaints, setComplaints] = useState([]);
     const [filter, setFilter] = useState('all');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedComplaintId, setSelectedComplaintId] = useState(null);
+    const [replyMessage, setReplyMessage] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         fetchComplaints();
@@ -29,77 +34,164 @@ const ComplaintManagement = () => {
 
     const handleStatusUpdate = async (complaintId, newStatus) => {
         try {
-            console.log('Updating complaint status:', complaintId, newStatus);
-            const response = await axios.put(`/admin-api/mark-complaint-solved/${complaintId}`);
-            console.log('Update response:', response.data);
-            
+            setSelectedComplaintId(complaintId);
+            setIsSubmitting(true);
+
+            const response = await axios.put(`/admin-api/mark-complaint-solved/${complaintId}`, {
+                adminReply: replyMessage || undefined
+            });
+
             if (response.data.complaint) {
                 // Refresh the complaints list
                 fetchComplaints();
-                // Show success message
-                alert('Complaint marked as solved successfully');
+                // Reset the reply message
+                setReplyMessage('');
+                setSelectedComplaintId(null);
             }
         } catch (error) {
             console.error('Error updating status:', error.response?.data || error);
             alert(error.response?.data?.message || 'Failed to update complaint status');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleReply = async (complaintId) => {
+        if (!replyMessage.trim()) {
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        try {
+            const response = await axios.put(`/admin-api/reply-to-complaint/${complaintId}`, {
+                adminReply: replyMessage
+            });
+
+            if (response.data.success) {
+                // Refresh the complaints list
+                fetchComplaints();
+                // Reset the reply message
+                setReplyMessage('');
+                setSelectedComplaintId(null);
+            }
+        } catch (error) {
+            console.error('Error replying to complaint:', error);
+            alert('Failed to send reply');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     const filteredComplaints = complaints.filter(complaint => {
-        if (filter === 'all') return true;
-        if (filter === 'active') return complaint.status !== 'solved';
-        if (filter === 'solved') return complaint.status === 'solved';
-        return true;
+        // First apply status filter
+        let statusMatch = true;
+        if (filter === 'active') statusMatch = complaint.status !== 'solved';
+        if (filter === 'solved') statusMatch = complaint.status === 'solved';
+
+        // Then apply search filter if there's a search query
+        if (!searchQuery) return statusMatch;
+
+        const query = searchQuery.toLowerCase();
+        const searchMatch =
+            complaint.category?.toLowerCase().includes(query) ||
+            complaint.description?.toLowerCase().includes(query) ||
+            complaint.complaintBy?.toLowerCase().includes(query);
+
+        return statusMatch && searchMatch;
     });
 
     if (loading) return (
-        <div className="d-flex justify-content-center p-5">
-            <div className="spinner-border" role="status">
-                <span className="visually-hidden">Loading...</span>
-            </div>
+        <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <p className="loading-text">Loading complaints...</p>
         </div>
     );
 
     if (error) return (
-        <div className="alert alert-danger m-4" role="alert">
-            {error}
+        <div className="empty-state">
+            <AlertCircle size={48} className="empty-icon" style={{ color: 'var(--error)' }} />
+            <h3 className="empty-title" style={{ color: 'var(--error)' }}>Error</h3>
+            <p className="empty-text">{error}</p>
+            <button
+                className="admin-submit-button"
+                style={{ maxWidth: '200px' }}
+                onClick={fetchComplaints}
+            >
+                <RefreshCw size={18} />
+                <span>Try Again</span>
+            </button>
         </div>
     );
 
     return (
-        <div className="container py-4">
-            <div className="card">
-                <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h4 className="mb-0">Complaint Management</h4>
-                    <div className="btn-group">
-                        <button 
-                            className={`btn btn-${filter === 'all' ? 'light' : 'primary'}`}
+        <div className="admin-container">
+            <div className="admin-card">
+                <div className="admin-card-header">
+                    <h3 className="admin-card-title">
+                        <AlertCircle size={24} color="var(--primary)" />
+                        Complaint Management
+                    </h3>
+
+                    <div className="filter-buttons">
+                        <button
+                            className={`filter-button ${filter === 'all' ? 'active' : ''}`}
                             onClick={() => setFilter('all')}
                         >
+                            <Filter size={16} />
                             All ({complaints.length})
                         </button>
-                        <button 
-                            className={`btn btn-${filter === 'active' ? 'light' : 'primary'}`}
+                        <button
+                            className={`filter-button ${filter === 'active' ? 'active' : ''}`}
                             onClick={() => setFilter('active')}
                         >
+                            <AlertCircle size={16} />
                             Active ({complaints.filter(c => c.status !== 'solved').length})
                         </button>
-                        <button 
-                            className={`btn btn-${filter === 'solved' ? 'light' : 'primary'}`}
+                        <button
+                            className={`filter-button ${filter === 'solved' ? 'active' : ''}`}
                             onClick={() => setFilter('solved')}
                         >
+                            <CheckCircle size={16} />
                             Solved ({complaints.filter(c => c.status === 'solved').length})
+                        </button>
+                        <button
+                            className="filter-button"
+                            onClick={fetchComplaints}
+                        >
+                            <RefreshCw size={16} />
+                            Refresh
                         </button>
                     </div>
                 </div>
-                <div className="card-body">
+
+                <div className="admin-card-body">
+                    <div className="search-container">
+                        <input
+                            type="text"
+                            placeholder="Search complaints..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="search-input"
+                        />
+                        <Search size={18} className="search-icon" />
+                    </div>
+
                     {complaints.length === 0 ? (
-                        <div className="text-center p-4">
-                            <p className="mb-0">No complaints found.</p>
+                        <div className="empty-state">
+                            <AlertCircle size={48} className="empty-icon" />
+                            <h3 className="empty-title">No Complaints Found</h3>
+                            <p className="empty-text">There are no complaints in the system yet.</p>
+                        </div>
+                    ) : filteredComplaints.length === 0 ? (
+                        <div className="empty-state">
+                            <Search size={48} className="empty-icon" />
+                            <h3 className="empty-title">No Matching Complaints</h3>
+                            <p className="empty-text">No complaints match your current filters.</p>
                         </div>
                     ) : (
                         <div className="table-responsive">
-                            <table className="table table-hover">
+                            <table className="admin-table">
                                 <thead>
                                     <tr>
                                         <th>Category</th>
@@ -112,27 +204,103 @@ const ComplaintManagement = () => {
                                 <tbody>
                                     {filteredComplaints.map(complaint => (
                                         <tr key={complaint._id}>
-                                            <td>{complaint.category}</td>
+                                            <td style={{ textTransform: 'capitalize' }}>{complaint.category}</td>
                                             <td>{complaint.description}</td>
                                             <td>{complaint.complaintBy}</td>
                                             <td>
-                                                <span className={`badge ${
-                                                    complaint.status === 'solved' 
-                                                        ? 'bg-success' 
-                                                        : 'bg-warning'
+                                                <div className={`status-badge ${
+                                                    complaint.status === 'solved'
+                                                        ? 'status-solved'
+                                                        : 'status-active'
                                                 }`}>
-                                                    {complaint.status || 'active'}
-                                                </span>
+                                                    {complaint.status === 'solved' ? (
+                                                        <><CheckCircle size={14} /> Solved</>
+                                                    ) : (
+                                                        <><AlertCircle size={14} /> Active</>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td>
-                                                {(!complaint.status || complaint.status !== 'solved') && (
-                                                    <button
-                                                        className="btn btn-success btn-sm"
-                                                        onClick={() => handleStatusUpdate(complaint._id, 'solved')}
-                                                    >
-                                                        Mark as Solved
-                                                    </button>
-                                                )}
+                                                <div className="action-buttons-container">
+                                                    {complaint.adminReply && (
+                                                        <div className="admin-reply-badge">
+                                                            <MessageSquare size={14} />
+                                                            <span>{complaint.adminReply}</span>
+                                                        </div>
+                                                    )}
+
+                                                    {selectedComplaintId === complaint._id ? (
+                                                        <div className="admin-reply-form">
+                                                            <textarea
+                                                                className="admin-form-control"
+                                                                placeholder="Enter reply message..."
+                                                                value={replyMessage}
+                                                                onChange={(e) => setReplyMessage(e.target.value)}
+                                                                rows={3}
+                                                            />
+                                                            <div className="admin-reply-actions">
+                                                                <button
+                                                                    className="action-button"
+                                                                    onClick={() => {
+                                                                        setSelectedComplaintId(null);
+                                                                        setReplyMessage('');
+                                                                    }}
+                                                                    disabled={isSubmitting}
+                                                                >
+                                                                    <XCircle size={18} />
+                                                                </button>
+
+                                                                {!complaint.status || complaint.status !== 'solved' ? (
+                                                                    <button
+                                                                        className="action-button action-button-approve"
+                                                                        onClick={() => handleStatusUpdate(complaint._id, 'solved')}
+                                                                        disabled={isSubmitting}
+                                                                        title="Mark as Solved with Reply"
+                                                                    >
+                                                                        {isSubmitting ? (
+                                                                            <div className="button-spinner small"></div>
+                                                                        ) : (
+                                                                            <CheckCircle size={18} />
+                                                                        )}
+                                                                    </button>
+                                                                ) : (
+                                                                    <button
+                                                                        className="action-button action-button-approve"
+                                                                        onClick={() => handleReply(complaint._id)}
+                                                                        disabled={isSubmitting || !replyMessage.trim()}
+                                                                        title="Send Reply"
+                                                                    >
+                                                                        {isSubmitting ? (
+                                                                            <div className="button-spinner small"></div>
+                                                                        ) : (
+                                                                            <Send size={18} />
+                                                                        )}
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <button
+                                                                className="action-button"
+                                                                onClick={() => setSelectedComplaintId(complaint._id)}
+                                                                title="Reply to Complaint"
+                                                            >
+                                                                <MessageSquare size={18} />
+                                                            </button>
+
+                                                            {(!complaint.status || complaint.status !== 'solved') && (
+                                                                <button
+                                                                    className="action-button action-button-approve"
+                                                                    onClick={() => handleStatusUpdate(complaint._id, 'solved')}
+                                                                    title="Mark as Solved"
+                                                                >
+                                                                    <CheckCircle size={18} />
+                                                                </button>
+                                                            )}
+                                                        </>
+                                                    )}
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}

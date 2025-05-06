@@ -7,7 +7,7 @@ const CommunityPost = require('../models/CommunityPostModel');
 const Outpass = require('../models/OutpassModel');
 const jwt = require('jsonwebtoken');
 const Student = require('../models/StudentModel');
-// const { verifyStudent } = require('../middleware/verifyStudentMiddleware');
+const verifyStudent = require('../middleware/verifyStudentMiddleware');
 require('dotenv').config();
 
 // Add this at the top of your routes
@@ -24,46 +24,46 @@ studentApp.get('/', (req, res) => {
 studentApp.post('/login', expressAsyncHandler(async (req, res) => {
     try {
         const { rollNumber, password } = req.body;
-        
+
         // Validate input
         if (!rollNumber || !password) {
-            return res.status(400).json({ 
-                message: "Roll number and password are required" 
+            return res.status(400).json({
+                message: "Roll number and password are required"
             });
         }
 
         // Find student
         const student = await Student.findOne({ rollNumber });
-        
+
         if (!student) {
-            return res.status(401).json({ 
-                message: "Invalid credentials" 
+            return res.status(401).json({
+                message: "Invalid credentials"
             });
         }
 
         // Check if account is active
         if (!student.is_active) {
-            return res.status(401).json({ 
-                message: "Account is inactive" 
+            return res.status(401).json({
+                message: "Account is inactive"
             });
         }
 
         // Compare password using the method we added to the schema
         const passwordMatch = await student.comparePassword(password);
-        
+
 
         if (!passwordMatch) {
-            return res.status(401).json({ 
-                message: "Invalid credentials" 
+            return res.status(401).json({
+                message: "Invalid credentials"
             });
         }
 
         // Generate token
         const token = jwt.sign(
-            { 
-                id: student._id, 
+            {
+                id: student._id,
                 role: 'student',
-                rollNumber: student.rollNumber 
+                rollNumber: student.rollNumber
             },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
@@ -87,9 +87,9 @@ studentApp.post('/login', expressAsyncHandler(async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ 
-            message: "Server error", 
-            error: error.message 
+        res.status(500).json({
+            message: "Server error",
+            error: error.message
         });
     }
 }));
@@ -122,6 +122,22 @@ studentApp.get('/announcements',expressAsyncHandler(async (req, res) => {
     }
 }))
 
+// to read a single announcement by ID
+studentApp.get('/announcement/:id', expressAsyncHandler(async (req, res) => {
+    try {
+        const { id } = req.params;
+        const announcement = await Announcement.findById(id);
+
+        if (!announcement) {
+            return res.status(404).json({ message: "Announcement not found" });
+        }
+
+        res.status(200).json(announcement);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}))
+
 // to post a general complaint
 studentApp.post('/post-complaint', expressAsyncHandler(async (req, res) => {
     try {
@@ -130,7 +146,7 @@ studentApp.post('/post-complaint', expressAsyncHandler(async (req, res) => {
         const newComplaint = new Complaint({
             category,
             description,
-        
+
             complaintBy
         });
 
@@ -146,10 +162,10 @@ studentApp.get('/get-complaints/:rollNumber', expressAsyncHandler(async (req, re
     try {
         const { rollNumber } = req.params;
         console.log('Fetching complaints for roll number:', rollNumber);
-        
+
         const complaints = await Complaint.find({ complaintBy: rollNumber }).sort({ createdAt: -1 });
         console.log('Found complaints:', complaints.length);
-        
+
         // Return the array directly
         res.status(200).json(complaints);
     } catch (error) {
@@ -240,19 +256,19 @@ studentApp.get('/all-outpasses/:rollNumber', expressAsyncHandler(async (req, res
 
 studentApp.post('/signup', expressAsyncHandler(async (req, res) => {
     try {
-        const { 
-            name, rollNumber, branch, year, phoneNumber, 
-            email, parentMobileNumber, roomNumber, password 
+        const {
+            name, rollNumber, branch, year, phoneNumber,
+            email, parentMobileNumber, roomNumber, password
         } = req.body;
-        
+
         // Check for existing student
-        const existingStudent = await Student.findOne({ 
-            $or: [{ rollNumber }, { email }] 
+        const existingStudent = await Student.findOne({
+            $or: [{ rollNumber }, { email }]
         });
-        
+
         if (existingStudent) {
-            return res.status(400).json({ 
-                message: "Student already exists with this roll number or email" 
+            return res.status(400).json({
+                message: "Student already exists with this roll number or email"
             });
         }
 
@@ -271,10 +287,10 @@ studentApp.post('/signup', expressAsyncHandler(async (req, res) => {
         });
 
         const savedStudent = await newStudent.save();
-        
 
-        res.status(201).json({ 
-            message: "Student registered successfully", 
+
+        res.status(201).json({
+            message: "Student registered successfully",
             student: {
                 id: savedStudent._id,
                 name: savedStudent.name,
@@ -288,6 +304,57 @@ studentApp.post('/signup', expressAsyncHandler(async (req, res) => {
     }
 }));
 
+// Update student profile
+studentApp.put('/update-profile/:rollNumber', verifyStudent, expressAsyncHandler(async (req, res) => {
+    try {
+        const { rollNumber } = req.params;
+        const { name, email, phoneNumber, parentMobileNumber, roomNumber } = req.body;
 
+        // Validate required fields
+        if (!name || !email || !phoneNumber || !parentMobileNumber || !roomNumber) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        // Verify that the student is updating their own profile
+        if (req.studentId) {
+            const student = await Student.findById(req.studentId);
+            if (student.rollNumber !== rollNumber) {
+                return res.status(403).json({ message: "You can only update your own profile" });
+            }
+        }
+
+        // Check if email is already in use by another student
+        const existingStudent = await Student.findOne({
+            email,
+            rollNumber: { $ne: rollNumber }
+        });
+
+        if (existingStudent) {
+            return res.status(400).json({ message: "Email is already in use by another student" });
+        }
+
+        // Update student profile
+        const updatedStudent = await Student.findOneAndUpdate(
+            { rollNumber },
+            {
+                name,
+                email,
+                phoneNumber,
+                parentMobileNumber,
+                roomNumber
+            },
+            { new: true }
+        ).select('-password');
+
+        if (!updatedStudent) {
+            return res.status(404).json({ message: "Student not found" });
+        }
+
+        res.status(200).json(updatedStudent);
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+}));
 
 module.exports = studentApp;

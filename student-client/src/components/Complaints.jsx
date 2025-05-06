@@ -1,59 +1,69 @@
 import { useState } from 'react';
-import { Megaphone, CalendarDays, ArrowRight } from 'lucide-react';
+import { Megaphone, FileText, History, Search } from 'lucide-react';
 import PostComplaint from './PostComplaints';
 import ComplaintsList from './ComplaintsList';
 
-
 const Complaints = () => {
-    const [activeTab, setActiveTab] = useState('complaint'); // Default to today's announcements
-
-    const tabHeaderStyle = {
-        display: 'flex',
-        justifyContent: 'center',
-        borderBottom: '1px solid #FFE082', // Changed to light yellow
-        marginBottom: '2rem'
-    };
-
-    const tabStyle = {
-        padding: '0.75rem 1.5rem',
-        cursor: 'pointer',
-        fontWeight: '500',
-        display: 'flex',
-        alignItems: 'center',
-        margin: '0 1rem',
-        borderBottom: '3px solid transparent'
-    };
-
-    const activeTabStyle = {
-        ...tabStyle,
-        borderBottom: '3px solid #FFAE00', // Changed to primary yellow
-        color: '#FFAE00' // Changed to primary yellow
-    };
+    const [activeTab, setActiveTab] = useState('complaint');
+    const [searchQuery, setSearchQuery] = useState('');
 
     return (
-        <div style={{ padding: '2rem', backgroundColor: '#FFF9E6' }}> {/* Added light yellow background */}
-            <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: '#E59D00' }}> {/* Changed to darker yellow */}
-                <Megaphone size={32} style={{ marginRight: '10px' }} /> Complaints
+        <div className="complaints-container">
+            <h2 className="form-title">
+                <Megaphone size={28} style={{ marginRight: '10px', color: 'var(--primary)' }} />
+                Complaints Section
             </h2>
 
-            {/* Tab Headers */}
-            <div style={tabHeaderStyle}>
-                <div 
-                    style={activeTab === 'complaint' ? activeTabStyle : tabStyle}
+            <div className="tab-header">
+                <div
+                    className={`tab ${activeTab === 'complaint' ? 'active' : ''}`}
                     onClick={() => setActiveTab('complaint')}
                 >
-                    <CalendarDays size={24} style={{ marginRight: '8px' }} /> Post Complaint
+                    <FileText size={20} className="tab-icon" />
+                    Post Complaint
                 </div>
-                <div 
-                    style={activeTab === 'complaint-list' ? activeTabStyle : tabStyle}
+                <div
+                    className={`tab ${activeTab === 'complaint-list' ? 'active' : ''}`}
                     onClick={() => setActiveTab('complaint-list')}
                 >
-                    <ArrowRight size={24} style={{ marginRight: '8px' }} /> Complaint History
+                    <History size={20} className="tab-icon" />
+                    Complaints History
                 </div>
             </div>
 
-            {/* Content based on active tab */}
-            {activeTab === 'complaint' ? <PostComplaint/> : <ComplaintsList />}
+            {activeTab === 'complaint-list' && (
+                <div style={{
+                    maxWidth: '600px',
+                    margin: '0 auto 2rem auto',
+                    position: 'relative'
+                }}>
+                    <input
+                        type="text"
+                        placeholder="Search complaints..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="form-control"
+                        style={{
+                            paddingLeft: '2.5rem',
+                        }}
+                    />
+                    <Search
+                        size={18}
+                        style={{
+                            position: 'absolute',
+                            left: '0.75rem',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            color: 'var(--text-secondary)'
+                        }}
+                    />
+                </div>
+            )}
+
+            {activeTab === 'complaint' ?
+                <PostComplaint /> :
+                <ComplaintsList searchQuery={searchQuery} />
+            }
         </div>
     );
 };

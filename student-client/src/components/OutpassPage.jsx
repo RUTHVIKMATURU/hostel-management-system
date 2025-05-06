@@ -1,56 +1,69 @@
 import { useState } from 'react';
-import { Megaphone, CalendarDays, ArrowRight } from 'lucide-react';
+import { FileText, History, Search } from 'lucide-react';
 import Outpass from './Outpass';
 import OutpassList from './OutpassList';
 
 const OutpassPage = () => {
     const [activeTab, setActiveTab] = useState('outpass');
-
-    const tabHeaderStyle = {
-        display: 'flex',
-        justifyContent: 'center',
-        borderBottom: '1px solid #FFE082', // Changed to light yellow
-        marginBottom: '2rem'
-    };
-
-    const tabStyle = {
-        padding: '0.75rem 1.5rem',
-        cursor: 'pointer',
-        fontWeight: '500',
-        display: 'flex',
-        alignItems: 'center',
-        margin: '0 1rem',
-        borderBottom: '3px solid transparent'
-    };
-
-    const activeTabStyle = {
-        ...tabStyle,
-        borderBottom: '3px solid #FFAE00', // Changed to primary yellow
-        color: '#FFAE00' // Changed to primary yellow
-    };
+    const [searchQuery, setSearchQuery] = useState('');
 
     return (
-        <div style={{ padding: '2rem', backgroundColor: '#FFF9E6' }}> {/* Added light yellow background */}
-            <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: '#E59D00' }}> {/* Changed to darker yellow */}
-                <Megaphone size={32} style={{ marginRight: '10px' }} /> OUTPASS SECTION
+        <div className="outpass-container">
+            <h2 className="form-title">
+                <FileText size={28} style={{ marginRight: '10px', color: 'var(--primary)' }} />
+                Outpass Application
             </h2>
 
-            <div style={tabHeaderStyle}>
-                <div 
-                    style={activeTab === 'outpass' ? activeTabStyle : tabStyle}
+            <div className="tab-header">
+                <div
+                    className={`tab ${activeTab === 'outpass' ? 'active' : ''}`}
                     onClick={() => setActiveTab('outpass')}
                 >
-                    <CalendarDays size={24} style={{ marginRight: '8px' }} /> Apply For OutPass
+                    <FileText size={20} className="tab-icon" />
+                    Apply For Outpass
                 </div>
-                <div 
-                    style={activeTab === 'outpassList' ? activeTabStyle : tabStyle}
+                <div
+                    className={`tab ${activeTab === 'outpassList' ? 'active' : ''}`}
                     onClick={() => setActiveTab('outpassList')}
                 >
-                    <ArrowRight size={24} style={{ marginRight: '8px' }} /> OutPass History 
+                    <History size={20} className="tab-icon" />
+                    Outpass History
                 </div>
             </div>
 
-            {activeTab === 'outpass' ? <Outpass /> : <OutpassList />}
+            {activeTab === 'outpassList' && (
+                <div style={{
+                    maxWidth: '600px',
+                    margin: '0 auto 2rem auto',
+                    position: 'relative'
+                }}>
+                    <input
+                        type="text"
+                        placeholder="Search outpass requests..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="form-control"
+                        style={{
+                            paddingLeft: '2.5rem',
+                        }}
+                    />
+                    <Search
+                        size={18}
+                        style={{
+                            position: 'absolute',
+                            left: '0.75rem',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            color: 'var(--text-secondary)'
+                        }}
+                    />
+                </div>
+            )}
+
+            {activeTab === 'outpass' ?
+                <Outpass /> :
+                <OutpassList searchQuery={searchQuery} />
+            }
         </div>
     );
 };

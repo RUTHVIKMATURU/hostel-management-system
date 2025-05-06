@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from '../utils/axios';
 import { useAuth } from '../context/AuthContext';
+import { User, Lock, LogIn, AlertCircle } from 'lucide-react';
 
 const AdminLogin = () => {
     const { login } = useAuth();
@@ -12,11 +13,11 @@ const AdminLogin = () => {
     const onSubmit = async (data) => {
         try {
             const response = await axios.post('/admin-api/login', data);
-            
+
             if (response.data.token && response.data.admin) {
                 // Use the login function from context
                 login(response.data.admin, response.data.token);
-                
+
                 // Navigate to dashboard or intended destination
                 const from = location.state?.from?.pathname || '/dashboard';
                 navigate(from, { replace: true });
@@ -31,39 +32,57 @@ const AdminLogin = () => {
     };
 
     return (
-        <div style={styles.container}>
-            <div style={styles.formCard}>
-                <h2 style={styles.title}>Admin Login</h2>
-                <form onSubmit={handleSubmit(onSubmit)} style={styles.form}>
-                    <div style={styles.inputGroup}>
-                        <input
-                            {...register('username', { 
-                                required: 'Username is required'
-                            })}
-                            placeholder="Username"
-                            style={styles.input}
-                        />
+        <div className="admin-login-container">
+            <div className="admin-login-card">
+                <div className="admin-login-logo">
+                    <div className="admin-logo-circle">
+                        <User size={32} color="#00BFA6" />
+                    </div>
+                </div>
+                <h2 className="admin-login-title">Admin Login</h2>
+                <form onSubmit={handleSubmit(onSubmit)} className="admin-login-form">
+                    <div className="admin-form-group">
+                        <div className="admin-input-container">
+                            <User size={20} className="admin-input-icon" />
+                            <input
+                                {...register('username', {
+                                    required: 'Username is required'
+                                })}
+                                placeholder="Username"
+                                className="admin-input"
+                            />
+                        </div>
                         {errors.username && (
-                            <span style={styles.error}>{errors.username.message}</span>
+                            <div className="admin-form-error">
+                                <AlertCircle size={16} />
+                                <span>{errors.username.message}</span>
+                            </div>
                         )}
                     </div>
 
-                    <div style={styles.inputGroup}>
-                        <input
-                            type="password"
-                            {...register('password', { 
-                                required: 'Password is required'
-                            })}
-                            placeholder="Password"
-                            style={styles.input}
-                        />
+                    <div className="admin-form-group">
+                        <div className="admin-input-container">
+                            <Lock size={20} className="admin-input-icon" />
+                            <input
+                                type="password"
+                                {...register('password', {
+                                    required: 'Password is required'
+                                })}
+                                placeholder="Password"
+                                className="admin-input"
+                            />
+                        </div>
                         {errors.password && (
-                            <span style={styles.error}>{errors.password.message}</span>
+                            <div className="admin-form-error">
+                                <AlertCircle size={16} />
+                                <span>{errors.password.message}</span>
+                            </div>
                         )}
                     </div>
 
-                    <button type="submit" style={styles.button}>
-                        Login
+                    <button type="submit" className="admin-login-button">
+                        <LogIn size={20} />
+                        <span>Login</span>
                     </button>
                 </form>
             </div>
@@ -71,66 +90,7 @@ const AdminLogin = () => {
     );
 };
 
-const styles = {
-    container: {
-        minHeight: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#FFF9E6', // Light yellow background
-        padding: '20px',
-    },
-    formCard: {
-        backgroundColor: '#ffffff',
-        borderRadius: '12px',
-        padding: '40px',
-        boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)',
-        width: '100%',
-        maxWidth: '500px',
-        borderTop: '5px solid #FFAE00', // Yellow accent border
-    },
-    title: {
-        textAlign: 'center',
-        color: '#333',
-        marginBottom: '30px',
-        fontSize: '28px',
-        fontWeight: 'bold',
-    },
-    form: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '20px',
-    },
-    inputGroup: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '5px',
-    },
-    input: {
-        padding: '14px',
-        borderRadius: '6px',
-        border: '1px solid #ddd',
-        fontSize: '16px',
-        transition: 'border-color 0.3s ease',
-        outline: 'none',
-    },
-    error: {
-        color: '#dc2626',
-        fontSize: '14px',
-        marginTop: '4px',
-    },
-    button: {
-        backgroundColor: '#FFAE00', // Yellow button
-        color: '#fff',
-        padding: '14px',
-        borderRadius: '6px',
-        border: 'none',
-        fontSize: '16px',
-        fontWeight: '600',
-        cursor: 'pointer',
-        transition: 'background-color 0.3s ease',
-    },
-};
+
 
 export default AdminLogin;
 

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import '../HomeStyles.css'; // Updated import path
+import { LogOut, AlertTriangle, Bell, Calendar, Clock, ChevronRight, RefreshCw, Info, ArrowRight } from 'lucide-react';
+import '../HomeStyles.css';
 
 const Home = () => {
     const [studentInfo, setStudentInfo] = useState(null);
@@ -9,6 +10,7 @@ const Home = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeCard, setActiveCard] = useState(null);
+    const [expandedAnnouncements, setExpandedAnnouncements] = useState({});
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -27,22 +29,22 @@ const Home = () => {
                         Authorization: `Bearer ${localStorage.getItem('studentToken')}`
                     }
                 });
-                
+
                 // Filter announcements from the last 2 days
                 const twoDaysAgo = new Date();
                 twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-                
+
                 const recentAnnouncements = response.data.filter(announcement => {
                     const dateField = announcement.createdAt || announcement.dateTime;
                     const announcementDate = new Date(dateField);
-                    
+
                     if (isNaN(announcementDate.getTime())) {
                         return false;
                     }
-                    
+
                     return announcementDate >= twoDaysAgo;
                 });
-                
+
                 setRecentAnnouncements(recentAnnouncements);
                 setError(null);
                 setLoading(false);
@@ -50,20 +52,20 @@ const Home = () => {
                 console.error('Error fetching announcements:', error);
                 setError('Failed to load recent announcements. Please try again later.');
                 setLoading(false);
-                
+
                 // Try to fetch without authentication as fallback
                 try {
                     const fallbackResponse = await axios.get('http://localhost:3000/student-api/all-announcements');
                     if (fallbackResponse.data && Array.isArray(fallbackResponse.data)) {
                         const twoDaysAgo = new Date();
                         twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-                        
+
                         const recentAnnouncements = fallbackResponse.data.filter(announcement => {
                             const dateField = announcement.createdAt || announcement.dateTime;
                             const announcementDate = new Date(dateField);
                             return !isNaN(announcementDate.getTime()) && announcementDate >= twoDaysAgo;
                         });
-                        
+
                         setRecentAnnouncements(recentAnnouncements);
                         setError(null);
                         setLoading(false);
@@ -75,46 +77,53 @@ const Home = () => {
         };
 
         fetchAnnouncements();
-        
+
         // Add animation classes with delay for staggered entrance
         const timer = setTimeout(() => {
             document.querySelector('.welcome-section').classList.add('animate-in');
-            
+
             setTimeout(() => {
                 document.querySelector('.quick-links-section').classList.add('animate-in');
-                
+
                 setTimeout(() => {
                     document.querySelector('.announcements-section').classList.add('animate-in');
                 }, 200);
             }, 200);
         }, 100);
-        
+
         return () => clearTimeout(timer);
     }, []);
 
     const handleQuickLinkClick = (path) => {
         navigate(path);
     };
-    
+
+    const toggleAnnouncementExpand = (id) => {
+        setExpandedAnnouncements(prev => ({
+            ...prev,
+            [id]: !prev[id]
+        }));
+    };
+
     const quickLinks = [
         {
             title: 'Outpass',
             description: 'Apply for hostel outpass',
-            icon: 'bi-box-arrow-right',
+            icon: <LogOut size={24} />,
             path: '/outpass',
             color: '#FF6B6B'
         },
         {
             title: 'Complaints',
             description: 'Register your complaints',
-            icon: 'bi-exclamation-triangle',
+            icon: <AlertTriangle size={24} />,
             path: '/complaints/complaint',
             color: '#4ECDC4'
         },
         {
             title: 'Announcements',
             description: 'View latest updates',
-            icon: 'bi-megaphone',
+            icon: <Bell size={24} />,
             path: '/announcements/all',
             color: '#FFD166'
         }
@@ -144,7 +153,7 @@ const Home = () => {
                 <h2 className="section-title">Quick Links</h2>
                 <div className="quick-links-grid">
                     {quickLinks.map((link, index) => (
-                        <div 
+                        <div
                             key={index}
                             className={`quick-link-card ${activeCard === index ? 'active' : ''}`}
                             onClick={() => handleQuickLinkClick(link.path)}
@@ -152,13 +161,13 @@ const Home = () => {
                             onMouseLeave={() => setActiveCard(null)}
                             style={{'--card-color': link.color}}
                         >
-                            <div className="quick-link-icon">
-                                <i className={`bi ${link.icon}`}></i>
+                            <div className="quick-link-icon" style={{backgroundColor: `${link.color}20`, color: link.color}}>
+                                {link.icon}
                             </div>
                             <h3 className="quick-link-title">{link.title}</h3>
                             <p className="quick-link-description">{link.description}</p>
                             <div className="quick-link-arrow">
-                                <i className="bi bi-arrow-right"></i>
+                                <ArrowRight size={16} />
                             </div>
                         </div>
                     ))}
@@ -176,13 +185,13 @@ const Home = () => {
                         </div>
                     ) : error ? (
                         <div className="error-container">
-                            <i className="bi bi-exclamation-circle"></i>
+                            <AlertTriangle size={24} />
                             <p>{error}</p>
-                            <button 
-                                onClick={() => window.location.reload()} 
+                            <button
+                                onClick={() => window.location.reload()}
                                 className="retry-button"
                             >
-                                <i className="bi bi-arrow-clockwise"></i> Retry
+                                <RefreshCw size={16} /> Retry
                             </button>
                         </div>
                     ) : recentAnnouncements.length > 0 ? (
@@ -193,26 +202,43 @@ const Home = () => {
                                     <span className="announcement-badge">New</span>
                                 </div>
                                 <p className="announcement-date">
-                                    <i className="bi bi-calendar-event"></i>
-                                    {new Date(announcement.createdAt || announcement.dateTime).toLocaleDateString()} 
+                                    <Calendar size={14} className="announcement-icon" />
+                                    {new Date(announcement.createdAt || announcement.dateTime).toLocaleDateString()}
                                     {" "}
-                                    <i className="bi bi-clock"></i>
+                                    <Clock size={14} className="announcement-icon" />
                                     {new Date(announcement.createdAt || announcement.dateTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                                 </p>
-                                <p className="announcement-content">{announcement.description || announcement.content}</p>
+                                <div className={`announcement-content ${expandedAnnouncements[announcement._id] ? 'expanded' : ''}`}>
+                                    {announcement.description || announcement.content}
+                                </div>
                                 <div className="announcement-footer">
-                                    <button className="read-more-button">
-                                        Read More <i className="bi bi-chevron-right"></i>
+                                    <button
+                                        className="read-more-button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleAnnouncementExpand(announcement._id);
+                                        }}
+                                    >
+                                        {expandedAnnouncements[announcement._id] ? 'Show Less' : 'Read More'} <ChevronRight size={16} className={expandedAnnouncements[announcement._id] ? 'rotate-down' : ''} />
+                                    </button>
+                                    <button
+                                        className="view-details-button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(`/announcements/${announcement._id}`);
+                                        }}
+                                    >
+                                        View Details <ArrowRight size={16} />
                                     </button>
                                 </div>
                             </div>
                         ))
                     ) : (
                         <div className="empty-container">
-                            <i className="bi bi-info-circle"></i>
+                            <Info size={24} />
                             <p>No announcements in the last 2 days.</p>
-                            <button 
-                                onClick={() => navigate('/announcements/all')} 
+                            <button
+                                onClick={() => navigate('/announcements/all')}
                                 className="view-all-button"
                             >
                                 View All Announcements
