@@ -20,12 +20,13 @@ const TodayAnnouncements = ({ searchQuery = '' }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [expandedAnnouncements, setExpandedAnnouncements] = useState({});
+    const API = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
         const fetchTodayAnnouncements = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get('http://localhost:3000/student-api/announcements');
+                const response = await axios.get(`${API}/student-api/announcements`);
                 setTodayAnnouncements(response.data);
                 setLoading(false);
             } catch (error) {

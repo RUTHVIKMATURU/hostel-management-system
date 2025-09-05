@@ -12,6 +12,7 @@ const Home = () => {
     const [activeCard, setActiveCard] = useState(null);
     const [expandedAnnouncements, setExpandedAnnouncements] = useState({});
     const navigate = useNavigate();
+    const API = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
         // Get student info from localStorage
@@ -24,7 +25,7 @@ const Home = () => {
         const fetchAnnouncements = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get('http://localhost:3000/student-api/all-announcements', {
+                const response = await axios.get(`${API}/student-api/all-announcements`, {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('studentToken')}`
                     }
@@ -55,7 +56,7 @@ const Home = () => {
 
                 // Try to fetch without authentication as fallback
                 try {
-                    const fallbackResponse = await axios.get('http://localhost:3000/student-api/all-announcements');
+                    const fallbackResponse = await axios.get(`${API}/student-api/all-announcements`);
                     if (fallbackResponse.data && Array.isArray(fallbackResponse.data)) {
                         const twoDaysAgo = new Date();
                         twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);

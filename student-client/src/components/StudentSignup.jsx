@@ -10,6 +10,7 @@ const StudentSignup = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
+    const API = import.meta.env.VITE_API_URL;
 
     const onSubmit = async (data) => {
         setIsSubmitting(true);
@@ -17,7 +18,7 @@ const StudentSignup = () => {
         setSuccessMessage('');
 
         try {
-            const response = await axios.post('http://localhost:3000/student-api/signup', data);
+            const response = await axios.post(`${API}/student-api/signup`, data);
             setSuccessMessage('Registration Successful! Redirecting to login...');
 
             // Navigate after a short delay to show the success message

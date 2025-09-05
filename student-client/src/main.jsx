@@ -18,7 +18,6 @@ import Home from './pages/Home.jsx';
 import StudentLogin from './components/StudentLogin.jsx';
 import StudentSignup from './components/StudentSignup.jsx';
 import Announcement from './components/Announcement.jsx';
-import Community from './components/Community.jsx';
 import Complaints from './components/Complaints.jsx';
 import Outpass from './components/Outpass.jsx';
 import StudentProfile from './components/StudentProfile.jsx';

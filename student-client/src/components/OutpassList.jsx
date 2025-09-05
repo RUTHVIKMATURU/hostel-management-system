@@ -8,6 +8,7 @@ const OutpassList = ({ searchQuery = '' }) => {
     const [outpasses, setOutpasses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const API = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
         const fetchOutpasses = async () => {
@@ -18,7 +19,7 @@ const OutpassList = ({ searchQuery = '' }) => {
             }
 
             try {
-                const response = await axiosInstance.get(`/student-api/all-outpasses/${user.rollNumber}`);
+                const response = await axiosInstance.get(`${API}/student-api/all-outpasses/${user.rollNumber}`);
 
                 if (response.data && response.data.studentOutpasses) {
                     // Sort outpasses by date (newest first)

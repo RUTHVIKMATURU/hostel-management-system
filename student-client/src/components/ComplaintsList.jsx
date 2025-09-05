@@ -11,6 +11,7 @@ const ComplaintsList = ({ searchQuery = '' }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [refreshKey, setRefreshKey] = useState(0); // Used to force refresh
+    const API = import.meta.env.VITE_API_URL;
 
     // Force refresh when navigated with refresh state
     useEffect(() => {
@@ -32,7 +33,7 @@ const ComplaintsList = ({ searchQuery = '' }) => {
                 // Add cache-busting parameter to prevent caching
                 const timestamp = new Date().getTime();
                 const response = await axiosInstance.get(
-                    `/student-api/get-complaints/${user.rollNumber}?_=${timestamp}`
+                    `${API}/student-api/get-complaints/${user.rollNumber}?_=${timestamp}`
                 );
 
                 if (Array.isArray(response.data)) {

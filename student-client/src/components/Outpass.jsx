@@ -12,6 +12,7 @@ function Outpass() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const API = import.meta.env.VITE_API_URL;
 
     // Watch form values for validation
     const outTime = watch('outTime');
@@ -47,7 +48,7 @@ function Outpass() {
                 year
             };
 
-            const response = await axios.post('http://localhost:3000/student-api/apply-outpass', payload);
+            const response = await axios.post(`${API}/student-api/apply-outpass`, payload);
 
             setSuccess(response.data.message || 'Outpass request submitted successfully!');
             reset();

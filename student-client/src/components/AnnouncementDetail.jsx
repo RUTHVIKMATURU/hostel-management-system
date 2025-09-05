@@ -16,6 +16,8 @@ const theme = {
 };
 
 const AnnouncementDetail = () => {
+    const API = import.meta.env.VITE_API_URL;
+
     const { id } = useParams();
     const navigate = useNavigate();
     const [announcement, setAnnouncement] = useState(null);
@@ -26,7 +28,7 @@ const AnnouncementDetail = () => {
         const fetchAnnouncementDetail = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(`http://localhost:3000/student-api/announcement/${id}`);
+                const response = await axios.get(`${API}/student-api/announcement/${id}`);
                 setAnnouncement(response.data);
                 setLoading(false);
             } catch (error) {

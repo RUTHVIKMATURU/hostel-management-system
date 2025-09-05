@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Calendar, Clock, AlertCircle, RefreshCw, Info, ChevronRight, Archive, ArrowRight } from 'lucide-react';
 import '../styles/AnnouncementStyles.css';
-
+;
 // Define theme colors - matching with parent component
 const theme = {
     primary: '#6C63FF', // Purple accent
@@ -15,6 +15,8 @@ const theme = {
 };
 
 const AllAnnouncements = ({ searchQuery = '' }) => {
+    const API = import.meta.env.VITE_API_URL;
+
     const navigate = useNavigate();
     const [allAnnouncements, setAllAnnouncements] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -26,7 +28,7 @@ const AllAnnouncements = ({ searchQuery = '' }) => {
         const fetchAllAnnouncements = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get('http://localhost:3000/student-api/all-announcements');
+                const response = await axios.get(`${API}/student-api/all-announcements`);
 
                 // Sort announcements by date (newest first)
                 const sortedAnnouncements = response.data.sort((a, b) => {

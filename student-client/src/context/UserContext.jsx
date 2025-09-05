@@ -2,8 +2,9 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
 const UserContext = createContext();
-
 export const UserProvider = ({ children }) => {
+    const API = import.meta.env.VITE_API_URL;
+
     const [user, setUser] = useState(() => {
         const storedUser = localStorage.getItem('studentInfo');
         return storedUser ? JSON.parse(storedUser) : null;
@@ -33,7 +34,7 @@ export const UserProvider = ({ children }) => {
 
             // Create a new endpoint for student profile update
             const response = await axios.put(
-                `http://localhost:3000/student-api/update-profile/${user.rollNumber}`,
+                `${API}/student-api/update-profile/${user.rollNumber}`,
                 updatedData,
                 {
                     headers: {

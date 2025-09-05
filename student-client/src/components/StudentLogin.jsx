@@ -9,6 +9,8 @@ const StudentLogin = () => {
     const { login } = useUser();
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const API = import.meta.env.VITE_API_URL;
+
     const {
         register,
         handleSubmit,
@@ -20,7 +22,7 @@ const StudentLogin = () => {
         setIsSubmitting(true);
 
         try {
-            const response = await axiosInstance.post('/student-api/login', {
+            const response = await axiosInstance.post(`${API}/student-api/login`, {
                 rollNumber: data.rollNumber,
                 password: data.password
             });

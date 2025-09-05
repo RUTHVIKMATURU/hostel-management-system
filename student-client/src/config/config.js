@@ -1,7 +1,10 @@
+const API = import.meta.env.VITE_API_URL;
+
+
 const config = {
-    API_BASE_URL: 'http://localhost:3000',
-    STUDENT_API_URL: 'http://localhost:3000/student-api',
-    ADMIN_API_URL: 'http://localhost:3000/admin-api'
+  API_BASE_URL: API,
+  STUDENT_API_URL: `${API}/student-api`,
+  ADMIN_API_URL: `${API}/admin-api`
 };
 
 export default config;

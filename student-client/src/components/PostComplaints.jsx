@@ -12,6 +12,7 @@ const PostComplaint = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const API = import.meta.env.VITE_API_URL;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -34,7 +35,7 @@ const PostComplaint = () => {
                 complaintBy: user.rollNumber
             };
 
-            const response = await axiosInstance.post('/student-api/post-complaint', payload);
+            const response = await axiosInstance.post(`${API}/student-api/post-complaint`, payload);
 
             // Clear form
             setCategory('');
