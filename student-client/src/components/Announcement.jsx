@@ -75,32 +75,34 @@ const Announcement = () => {
 
             {/* Tab Headers with animation */}
             <div id="announcement-tabs" style={styles.tabContainer}>
-                <div style={styles.tabHeader}>
+                <div className="announcement-tabs">
                     <div
+                        className="announcement-tab"
                         style={{
-                            ...styles.tab,
-                            backgroundColor: activeTab === 'today' ? 'rgba(108, 99, 255, 0.1)' : 'transparent',
-                            color: activeTab === 'today' ? theme.primary : theme.textSecondary,
-                            borderBottom: activeTab === 'today' ? `2px solid ${theme.primary}` : '2px solid transparent'
+                        backgroundColor: activeTab === 'today' ? 'rgba(108, 99, 255, 0.1)' : 'transparent',
+                        color: activeTab === 'today' ? theme.primary : theme.textSecondary,
+                        borderBottom: activeTab === 'today' ? `2px solid ${theme.primary}` : '2px solid transparent'
                         }}
                         onClick={() => setActiveTab('today')}
                     >
                         <CalendarDays size={20} style={{ marginRight: '8px' }} />
                         <span>Today's Announcements</span>
                     </div>
+
                     <div
+                        className="announcement-tab"
                         style={{
-                            ...styles.tab,
-                            backgroundColor: activeTab === 'all' ? 'rgba(108, 99, 255, 0.1)' : 'transparent',
-                            color: activeTab === 'all' ? theme.primary : theme.textSecondary,
-                            borderBottom: activeTab === 'all' ? `2px solid ${theme.primary}` : '2px solid transparent'
+                        backgroundColor: activeTab === 'all' ? 'rgba(108, 99, 255, 0.1)' : 'transparent',
+                        color: activeTab === 'all' ? theme.primary : theme.textSecondary,
+                        borderBottom: activeTab === 'all' ? `2px solid ${theme.primary}` : '2px solid transparent'
                         }}
                         onClick={() => setActiveTab('all')}
                     >
                         <History size={20} style={{ marginRight: '8px' }} />
                         <span>All Announcements</span>
                     </div>
-                </div>
+                    </div>
+
             </div>
 
             {/* Content based on active tab */}
